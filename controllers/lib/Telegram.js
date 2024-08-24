@@ -1,5 +1,5 @@
 const axiosInstance = require("./axios");
-const getGptResponse = require("./getrespons");
+const { getGptResponse } = require("./getrespons");
 
 async function sendMessage(messageObj, messageText) {
   return axiosInstance.get("sendMessage", {
@@ -15,6 +15,7 @@ async function handleMessage(messageObj) {
 
   try {
     const response = await getGptResponse(messageText);
+    console.log(response, "resGPT");
     return sendMessage(messageObj, response);
   } catch (err) {
     console.error("Error handling GPT response:", err);
