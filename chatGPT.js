@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+const OpenAI = require("openai");
 const openai = new OpenAI();
 
 async function chatGPT(message, threadId) {
