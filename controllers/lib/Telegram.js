@@ -16,7 +16,7 @@ async function handleMessage(messageObj) {
   try {
     const response = await getGptResponse(messageText);
     console.log(response, "resGPT");
-    return sendMessage(messageObj, response);
+    return sendMessage(messageObj, "hiii");
   } catch (err) {
     console.error("Error handling GPT response:", err);
     return sendMessage(messageObj, "Sorry, something went wrong.");
