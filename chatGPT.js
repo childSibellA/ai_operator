@@ -1,9 +1,14 @@
 const OpenAI = require("openai");
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in the environment
+});
+
 async function chatGPT(threadId, message) {
+  console.log("retrieved:", threadId, message);
   try {
     // Attempt to retrieve the existing thread
-    const myThread = await OpenAI.beta.threads.retrieve(threadId);
+    const myThread = await openai.beta.threads.retrieve(threadId);
     console.log("Thread retrieved:", myThread);
 
     // Send the message in the existing thread
@@ -28,7 +33,7 @@ async function chatGPT(threadId, message) {
 
 async function createNewThread() {
   try {
-    const run = await OpenAI.beta.threads.runs.create({
+    const run = await openai.beta.threads.runs.create({
       assistant_id: "asst_kgkdsXRNabGYXh0mumyLDAO2",
     });
     console.log("New thread created:", run.thread.id);
@@ -41,12 +46,12 @@ async function createNewThread() {
 
 async function sendMessageToThread(threadId, message) {
   try {
-    const threadMessage = await OpenAI.beta.threads.messages.create(threadId, {
+    const threadMessages = await openai.beta.threads.messages.create(threadId, {
       role: "user",
       content: message,
     });
-    console.log("Message sent to thread:", threadMessage);
-    return threadMessage;
+    console.log("Message sent to thread:", threadMessages);
+    return threadMessages;
   } catch (error) {
     console.error("Failed to send message to thread:", error.message);
     throw new Error("Failed to send message to thread");
