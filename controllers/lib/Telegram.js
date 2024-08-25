@@ -7,10 +7,11 @@ function sendMessage(messageObj, messageText) {
     text: messageText,
   });
 }
-async function getGpt() {
+async function getGpt(message, messageObj) {
   try {
-    const response = await getGptResponse("hi");
+    const response = await getGptResponse(message);
     console.log(response, "resGPT");
+    return sendMessage(messageObj, response);
   } catch (err) {
     console.error("Error handling GPT response:", err);
   }
@@ -30,7 +31,7 @@ function handleMessage(messageObj) {
         return sendMessage(messageObj, "Hey, hi, I do not get you");
     }
   } else {
-    return sendMessage(messageObj, messageText);
+    getGpt(messageText, messageObj);
   }
 }
 
