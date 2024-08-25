@@ -7,12 +7,13 @@ function sendMessage(messageObj, messageText) {
     text: messageText,
   });
 }
-
-try {
-  const response = await getGptResponse("hi");
-  console.log(response, "resGPT");
-} catch (err) {
-  console.error("Error handling GPT response:", err);
+async function getGpt() {
+  try {
+    const response = await getGptResponse("hi");
+    console.log(response, "resGPT");
+  } catch (err) {
+    console.error("Error handling GPT response:", err);
+  }
 }
 
 function handleMessage(messageObj) {
