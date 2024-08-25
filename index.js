@@ -16,6 +16,7 @@ app.get("*", async (req, res) => {
 
 app.post("*", async (req, res) => {
   await handler(req);
+  console.log(req.body);
   res.send("POST request handled");
 });
 

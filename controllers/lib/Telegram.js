@@ -10,16 +10,21 @@ async function sendMessage(messageObj, messageText) {
   });
 }
 
-async function handleMessage(messageObj) {
+function handleMessage(messageObj) {
   const messageText = messageObj.text || "";
-
-  try {
-    const response = await getGptResponse(messageText);
-    console.log(response, "resGPT");
-    return sendMessage(messageObj, "hiii");
-  } catch (err) {
-    console.error("Error handling GPT response:", err);
-    return sendMessage(messageObj, "Sorry, something went wrong.");
+  if (messageText.charAt(0) === "/") {
+    const command = messageText.substr(1);
+    switch (command) {
+      case "start":
+        return sendMessage(
+          messageObj,
+          "Hi, I’m a bot. I can help you to get started"
+        );
+      default:
+        return sendMessage(messageObj, "Hey, hi, I do not get you");
+    }
+  } else {
+    return sendMessage(messageObj, messageText);
   }
 }
 

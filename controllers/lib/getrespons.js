@@ -51,6 +51,7 @@ Guidelines:
         },
       }
     );
+    console.log(response.data.choices[0].message.content, "gpt");
     return response.data.choices[0].message.content.trim();
   } catch (error) {
     console.error(
