@@ -1,10 +1,18 @@
 const axiosInstance = require("./axios");
+const { getGptResponse } = require("./getGptResponse");
 
 function sendMessage(messageObj, messageText) {
   return axiosInstance.get("sendMessage", {
     chat_id: messageObj.chat.id,
     text: messageText,
   });
+}
+
+try {
+  const response = await getGptResponse("hi");
+  console.log(response, "resGPT");
+} catch (err) {
+  console.error("Error handling GPT response:", err);
 }
 
 function handleMessage(messageObj) {
