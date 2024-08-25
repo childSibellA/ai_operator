@@ -4,7 +4,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in the environment
 });
 
-async function chatGPT(threadId, message) {
+async function chatGPT(message, threadId) {
   console.log("retrieved:", threadId, message);
   try {
     // Attempt to retrieve the existing thread
