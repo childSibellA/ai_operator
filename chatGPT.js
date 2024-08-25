@@ -1,49 +1,56 @@
 const OpenAI = require("openai");
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // Ensure you have your API key set up in the environment
+  apiKey: process.env.OPENAI_API_KEY,
+  organization: process.env.ORGANIZATION_ID,
+  project: process.env.PORJECT_ID,
 });
 
-async function chatGPT(message, threadId) {
-  console.log("retrieved:", threadId, message);
-  try {
-    // Attempt to retrieve the existing thread
-    const myThread = await openai.beta.threads.retrieve(
-      "thread_wXFGeslhODZA8OVLY5NNukjf"
-    );
-    console.log("Thread retrieved:", myThread);
+const assistant_id = process.env.ASISTENT_ID;
 
-    // Send the message in the existing thread
-    return await sendMessageToThread(
-      "thread_wXFGeslhODZA8OVLY5NNukjf",
-      message
-    );
+async function chatGPT(message) {
+  console.log("Received message:", message);
+  try {
+    // Create a new empty thread
+    const emptyThread = await openai.beta.threads.create();
+    console.log("New thread created with ID:", emptyThread.id);
+
+    // Send an initial message to the thread
+    await sendMessageToThread(emptyThread.id, message);
+
+    // Start a run with the assistant
+    const run = await openai.beta.threads.runs.create(emptyThread.id, {
+      assistant_id: assistant_id,
+    });
+
+    // Wait for a short period before checking the status
+    await waitForCompletion(emptyThread.id, run.id);
   } catch (error) {
-    // if (error.response && error.response.status === 404) {
-    //   console.error(
-    //     `Thread not found with id '${threadId}'. Creating a new thread.`
-    //   );
-    //   // Create a new thread if it doesn't exist
-    //   const newThreadId = await createNewThread();
-    //   // Send the message in the new thread
-    //   return await sendMessageToThread(newThreadId, message);
-    // } else {
-    //   console.error("An error occurred:", error.message);
-    //   throw new Error("Failed to process the GPT interaction");
-    // }
+    console.log("An error occurred:", error.message);
   }
 }
 
-async function createNewThread() {
+async function waitForCompletion(threadId, runId) {
   try {
-    const run = await openai.beta.threads.runs.create({
-      assistant_id: "asst_kgkdsXRNabGYXh0mumyLDAO2",
+    let runStatus;
+    do {
+      const run = await openai.beta.threads.runs.retrieve(threadId, runId);
+      runStatus = run.status;
+      console.log("Current run status:", runStatus);
+
+      // If not completed, wait for a bit before checking again
+      if (runStatus !== "completed") {
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 2 seconds
+      }
+    } while (runStatus !== "completed");
+
+    // Once completed, get and log the messages
+    const messages = await openai.beta.threads.messages.list(threadId);
+    messages.data.forEach((item) => {
+      console.log(item.content);
     });
-    console.log("New thread created:", run.thread.id);
-    return run.thread.id;
   } catch (error) {
-    console.error("Failed to create a new thread:", error.message);
-    throw new Error("Failed to create a new thread");
+    console.error("Error while waiting for completion:", error.message);
   }
 }
 

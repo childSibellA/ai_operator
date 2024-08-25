@@ -1,6 +1,6 @@
 const axiosInstance = require("./axios");
-// const { getGptResponse } = require("./getGptResponse");
 const { chatGPT } = require("../../chatGPT");
+const { Customer } = require("../../models/Customer");
 
 function sendMessage(messageObj, messageText) {
   return axiosInstance.get("sendMessage", {
@@ -10,9 +10,20 @@ function sendMessage(messageObj, messageText) {
 }
 async function getGpt(message, messageObj) {
   try {
-    const response = await chatGPT(message, messageObj.chat.id);
-    console.log(response, "resGPT");
-    return sendMessage(messageObj, response);
+    const customer = await Customer.find({ chat_id: messageObj.chat.id });
+    if (!customer.length) {
+      const result = await chatGPT(message, "new thread");
+      console.log(result, "rsult");
+
+      customer.threads_id = result.threads_id;
+      await customer.save();
+
+      return sendMessage(messageObj, result.response);
+    } else {
+      const response = await chatGPT(message, "thread");
+      console.log(response, "resGPT");
+      return sendMessage(messageObj, response);
+    }
   } catch (err) {
     console.error("Error handling GPT response:", err);
   }
