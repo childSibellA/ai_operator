@@ -8,26 +8,29 @@ async function chatGPT(message, threadId) {
   console.log("retrieved:", threadId, message);
   try {
     // Attempt to retrieve the existing thread
-    const myThread = await openai.beta.threads.retrieve(threadId);
+    const myThread = await openai.beta.threads.retrieve(
+      "thread_wXFGeslhODZA8OVLY5NNukjf"
+    );
     console.log("Thread retrieved:", myThread);
 
     // Send the message in the existing thread
-    return await sendMessageToThread(threadId, message);
+    return await sendMessageToThread(
+      "thread_wXFGeslhODZA8OVLY5NNukjf",
+      message
+    );
   } catch (error) {
-    if (error.response && error.response.status === 404) {
-      console.error(
-        `Thread not found with id '${threadId}'. Creating a new thread.`
-      );
-
-      // Create a new thread if it doesn't exist
-      const newThreadId = await createNewThread();
-
-      // Send the message in the new thread
-      return await sendMessageToThread(newThreadId, message);
-    } else {
-      console.error("An error occurred:", error.message);
-      throw new Error("Failed to process the GPT interaction");
-    }
+    // if (error.response && error.response.status === 404) {
+    //   console.error(
+    //     `Thread not found with id '${threadId}'. Creating a new thread.`
+    //   );
+    //   // Create a new thread if it doesn't exist
+    //   const newThreadId = await createNewThread();
+    //   // Send the message in the new thread
+    //   return await sendMessageToThread(newThreadId, message);
+    // } else {
+    //   console.error("An error occurred:", error.message);
+    //   throw new Error("Failed to process the GPT interaction");
+    // }
   }
 }
 
