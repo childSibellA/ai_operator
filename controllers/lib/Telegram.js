@@ -11,6 +11,7 @@ function sendMessage(messageObj, messageText) {
 async function getGpt(message, messageObj) {
   try {
     const customer = await Customer.find({ chat_id: messageObj.chat.id });
+    sendMessage(messageObj, "pending");
     console.log(customer, "custoner");
     if (!customer.length) {
       // const result = await chatGPT(message, "new thread");
