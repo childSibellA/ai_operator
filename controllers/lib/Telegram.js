@@ -1,12 +1,9 @@
 const axiosInstance = require("./axios");
-const { getGptResponse } = require("./getrespons");
 
-async function sendMessage(messageObj, messageText) {
+function sendMessage(messageObj, messageText) {
   return axiosInstance.get("sendMessage", {
-    params: {
-      chat_id: messageObj.chat.id,
-      text: messageText,
-    },
+    chat_id: messageObj.chat.id,
+    text: messageText,
   });
 }
 
