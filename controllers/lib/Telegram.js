@@ -13,17 +13,17 @@ async function getGpt(message, messageObj) {
     const customer = await Customer.find({ chat_id: messageObj.chat.id });
     console.log(customer, "custoner");
     if (!customer.length) {
-      const result = await chatGPT(message, "new thread");
-      console.log(result, "rsult");
+      // const result = await chatGPT(message, "new thread");
+      // console.log(result, "rsult");
 
-      customer.threads_id = result.threads_id;
-      await customer.save();
+      // customer.threads_id = result.threads_id;
+      // await customer.save();
 
-      return sendMessage(messageObj, result.response);
+      return sendMessage(messageObj, "yes");
     } else {
-      const response = await chatGPT(message, "thread");
-      console.log(response, "resGPT");
-      return sendMessage(messageObj, response);
+      // const response = await chatGPT(message, "thread");
+      // console.log(response, "resGPT");
+      return sendMessage(messageObj, "no");
     }
   } catch (err) {
     console.error("Error handling GPT response:", err);
