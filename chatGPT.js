@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 const openai = new OpenAI();
 
-async function chatGPT(threadId, message) {
+async function chatGPT(message, threadId) {
   try {
     // Attempt to retrieve the existing thread
     const myThread = await openai.beta.threads.retrieve(threadId);
