@@ -1,10 +1,9 @@
-import OpenAI from "openai";
-const openai = new OpenAI();
+const OpenAI = require("openai");
 
 async function chatGPT(threadId, message) {
   try {
     // Attempt to retrieve the existing thread
-    const myThread = await openai.beta.threads.retrieve(threadId);
+    const myThread = await OpenAI.beta.threads.retrieve(threadId);
     console.log("Thread retrieved:", myThread);
 
     // Send the message in the existing thread
@@ -29,7 +28,7 @@ async function chatGPT(threadId, message) {
 
 async function createNewThread() {
   try {
-    const run = await openai.beta.threads.runs.create({
+    const run = await OpenAI.beta.threads.runs.create({
       assistant_id: "asst_kgkdsXRNabGYXh0mumyLDAO2",
     });
     console.log("New thread created:", run.thread.id);
@@ -42,7 +41,7 @@ async function createNewThread() {
 
 async function sendMessageToThread(threadId, message) {
   try {
-    const threadMessage = await openai.beta.threads.messages.create(threadId, {
+    const threadMessage = await OpenAI.beta.threads.messages.create(threadId, {
       role: "user",
       content: message,
     });
