@@ -46,7 +46,7 @@ app.get("*", async (req, res) => {
 app.post("*", async (req, res) => {
   try {
     await handler(req); // Handle the request with your custom handler
-    console.log("POST request body:", req.body);
+    // console.log("POST request body:", req.body);
     res.send("POST request handled");
   } catch (error) {
     console.error("Error handling POST request:", error);

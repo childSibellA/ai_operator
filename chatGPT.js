@@ -6,27 +6,47 @@ const openai = new OpenAI({
   project: process.env.PORJECT_ID,
 });
 
-const assistant_id = process.env.ASISTENT_ID;
+const assistant_id = process.env.ASSISTANT_ID;
 
-async function chatGPT(message) {
-  console.log("Received message:", message);
-  try {
-    // Create a new empty thread
-    const emptyThread = await openai.beta.threads.create();
-    console.log("New thread created with ID:", emptyThread.id);
+async function chatGPT(message, threads_id) {
+  if (threads_id === "no thread") {
+    try {
+      // Create a new empty thread
+      const emptyThread = await openai.beta.threads.create();
+      console.log("New thread created with ID:", emptyThread.id);
 
-    // Send an initial message to the thread
-    await sendMessageToThread(emptyThread.id, message);
+      // Send an initial message to the thread
+      await sendMessageToThread(emptyThread.id, message);
 
-    // Start a run with the assistant
-    const run = await openai.beta.threads.runs.create(emptyThread.id, {
-      assistant_id: assistant_id,
-    });
+      // Start a run with the assistant
+      const run = await openai.beta.threads.runs.create(emptyThread.id, {
+        assistant_id: assistant_id,
+      });
 
-    // Wait for a short period before checking the status
-    await waitForCompletion(emptyThread.id, run.id);
-  } catch (error) {
-    console.log("An error occurred:", error.message);
+      // Wait for a short period before checking the status
+      const messages = await waitForCompletion(emptyThread.id, run.id);
+      const sms = messages.data[0].content[0].text.value;
+
+      const result = { sms, threads_id };
+      return result;
+    } catch (error) {
+      console.log("An error occurred:", error.message);
+    }
+  } else {
+    try {
+      // Send an initial message to the thread
+      await sendMessageToThread(threads_id, message);
+
+      // Start a run with the assistant
+      const run = await openai.beta.threads.runs.create(threads_id, {
+        assistant_id: assistant_id,
+      });
+
+      // Wait for a short period before checking the status
+      await waitForCompletion(threads_id, run.id);
+    } catch (error) {
+      console.log("An error occurred:", error.message);
+    }
   }
 }
 
@@ -46,9 +66,7 @@ async function waitForCompletion(threadId, runId) {
 
     // Once completed, get and log the messages
     const messages = await openai.beta.threads.messages.list(threadId);
-    messages.data.forEach((item) => {
-      console.log(item.content);
-    });
+    return messages;
   } catch (error) {
     console.error("Error while waiting for completion:", error.message);
   }

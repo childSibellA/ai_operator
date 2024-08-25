@@ -1,6 +1,6 @@
 const axiosInstance = require("./axios");
 const { chatGPT } = require("../../chatGPT");
-const { Customer } = require("../../models/Customer");
+const Customer = require("../../models/Customer");
 
 function sendMessage(messageObj, messageText) {
   return axiosInstance.get("sendMessage", {
@@ -8,26 +8,48 @@ function sendMessage(messageObj, messageText) {
     text: messageText,
   });
 }
-async function getGpt(message, messageObj) {
+
+async function getCustomer(chat_id) {
   try {
-    const customer = await Customer.find({ chat_id: messageObj.chat.id });
-    sendMessage(messageObj, "pending");
-    console.log(customer, "custoner");
-    if (!customer.length) {
-      // const result = await chatGPT(message, "new thread");
-      // console.log(result, "rsult");
+    const customer = await Customer.findOne({ chat_id });
+    return customer;
+  } catch {
+    return false;
+  }
+}
 
-      // customer.threads_id = result.threads_id;
-      // await customer.save();
+async function getGpt(message, messageObj) {
+  const chat_id = messageObj.chat.id;
+  try {
+    // Await the result of getCustomer since it is an asynchronous function
+    let customer = await getCustomer(chat_id);
 
-      return sendMessage(messageObj, "yes");
+    if (!customer) {
+      // Check if customer does not exist
+      // Create a new thread and save the customer
+      const result = await chatGPT(message, "no thread");
+      const { threads_id, sms } = result;
+      console.log(result, "result");
+
+      // Create a new customer entry
+      customer = new Customer({
+        threads_id,
+        chat_id,
+      });
+
+      // Save the new customer to the database
+      await customer.save();
+
+      return sendMessage(messageObj, sms);
     } else {
-      // const response = await chatGPT(message, "thread");
-      // console.log(response, "resGPT");
-      return sendMessage(messageObj, "no");
+      // Use the existing customer thread
+      const result = await chatGPT(message, customer.threads_id);
+      const { sms } = result;
+      return sendMessage(messageObj, sms);
     }
   } catch (err) {
     console.error("Error handling GPT response:", err);
+    return sendMessage(messageObj, "Sorry, something went wrong.");
   }
 }
 
@@ -42,7 +64,7 @@ function handleMessage(messageObj) {
           "Hi, I’m a bot. I can help you to get started"
         );
       default:
-        return sendMessage(messageObj, "Hey, hi, I do not get you");
+        return sendMessage(messageObj, "Hey, hi, I do not get u");
     }
   } else {
     getGpt(messageText, messageObj);

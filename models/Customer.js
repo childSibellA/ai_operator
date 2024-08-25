@@ -1,15 +1,14 @@
 const mongoose = require("mongoose");
 
-// Define the schema for the Customer model
-const CustomerSchema = mongoose.Schema(
+const CustomerSchema = new mongoose.Schema(
   {
     chat_id: {
       type: String,
-      required: false,
+      required: true,
     },
     threads_id: {
       type: String,
-      required: false,
+      required: true,
     },
     gender: {
       type: String,
