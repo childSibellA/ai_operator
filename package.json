@@ -21,6 +21,7 @@
     "mongodb": "^5.5.0",
     "mongoose": "^6.4.6",
     "nodemailer": "^6.9.7",
+    "openai": "^4.56.0",
     "telegraf": "^4.8.1"
   },
   "devDependencies": {

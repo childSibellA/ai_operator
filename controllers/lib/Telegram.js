@@ -1,5 +1,6 @@
 const axiosInstance = require("./axios");
-const { getGptResponse } = require("./getGptResponse");
+// const { getGptResponse } = require("./getGptResponse");
+const { chatGPT } = require("../../chatGPT");
 
 function sendMessage(messageObj, messageText) {
   return axiosInstance.get("sendMessage", {
@@ -9,7 +10,7 @@ function sendMessage(messageObj, messageText) {
 }
 async function getGpt(message, messageObj) {
   try {
-    const response = await getGptResponse(message);
+    const response = await chatGPT(message, messageObj.chat.id);
     console.log(response, "resGPT");
     return sendMessage(messageObj, response);
   } catch (err) {
