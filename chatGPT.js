@@ -27,7 +27,7 @@ async function chatGPT(message, threads_id) {
       const messages = await waitForCompletion(emptyThread.id, run.id);
       const sms = messages.data[0].content[0].text.value;
 
-      const result = { sms, threads_id };
+      const result = { sms, threads_id: emptyThread.id };
       return result;
     } catch (error) {
       console.log("An error occurred:", error.message);

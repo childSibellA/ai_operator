@@ -25,7 +25,6 @@ async function getGpt(message, messageObj) {
     let customer = await getCustomer(chat_id);
 
     if (!customer) {
-      // Check if customer does not exist
       // Create a new thread and save the customer
       const result = await chatGPT(message, "no thread");
       const { threads_id, sms } = result;
