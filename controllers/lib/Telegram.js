@@ -43,7 +43,7 @@ async function getGpt(message, messageObj) {
       return sendMessage(messageObj, sms);
     } else {
       // Use the existing customer thread
-      const result = await chatGPT(message, customer.threads_id);
+      const result = await chatGPT(message, customer?.threads_id);
       const { sms } = result;
       return sendMessage(messageObj, sms);
     }
