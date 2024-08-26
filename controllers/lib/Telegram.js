@@ -23,6 +23,7 @@ async function getGpt(message, messageObj) {
   try {
     // Await the result of getCustomer since it is an asynchronous function
     let customer = await getCustomer(chat_id);
+    console.log(customer, "custone");
 
     if (!customer) {
       // Create a new thread and save the customer
