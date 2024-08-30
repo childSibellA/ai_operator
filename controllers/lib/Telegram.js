@@ -59,14 +59,14 @@ function handleMessage(messageObj) {
     const command = messageText.substr(1);
     switch (command) {
       case "start":
-        // return sendMessage(
-        //   messageObj,
-        //   "მიწერეთ რა გაწუხებთ, მამა ფოტი დაგეხმარებათ სულიერი სამყაროს შექმნასა და ქრისტეს პოვნაში"
-        // );
-        getGpt("გამარჯობა", messageObj);
+        return getGpt("გამარჯობა, რას მეტყვით თქვენს შესახებ", messageObj);
+      // return sendMessage(
+      //   messageObj,
+      //   "მიწერეთ რა გაწუხებთ, მამა ფოტი დაგეხმარებათ სულიერი სამყაროს შექმნასა და ქრისტეს პოვნაში"
+      // );
       default:
         // return sendMessage(messageObj, "Hey, hi, I do not get u");
-        getGpt(messageText, messageObj);
+        return getGpt(messageText, messageObj);
     }
   } else {
     getGpt(messageText, messageObj);
