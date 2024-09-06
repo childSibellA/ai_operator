@@ -1,6 +1,6 @@
-const axiosInstance = require("./axios");
-const { chatGPT } = require("../../chatGPT");
-const Customer = require("../../models/Customer");
+import { getAxiosInstance } from "../../config/axios.js";
+import { chatGPT } from "../../chatGPT.js";
+import { Customer } from "../../models/Customer.js";
 
 function sendMessage(messageObj, messageText) {
   return axiosInstance.get("sendMessage", {
@@ -53,7 +53,7 @@ async function getGpt(message, messageObj) {
   }
 }
 
-function handleMessage(messageObj) {
+export function handleMessage(messageObj) {
   const messageText = messageObj.text || "";
   if (messageText.charAt(0) === "/") {
     const command = messageText.substr(1);
@@ -70,5 +70,3 @@ function handleMessage(messageObj) {
     getGpt(messageText, messageObj);
   }
 }
-
-module.exports = { handleMessage };

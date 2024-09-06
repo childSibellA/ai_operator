@@ -1,8 +1,8 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const { handler } = require("./controllers"); // Import your request handler
-const connectDB = require("./config/db");
-const dotenv = require("dotenv");
+import express from "express";
+import bodyParser from "body-parser";
+import { handler } from "./controllers/index.js";
+import { connectDB } from "./config/db.js";
+import dotenv from "dotenv";
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -13,22 +13,6 @@ const app = express();
 
 // Middleware for parsing JSON bodies in requests
 app.use(bodyParser.json());
-
-// Example function to interact with chatGPT (uncomment and modify as needed)
-/*
-async function getGpt(message) {
-  try {
-    const response = await chatGPT(message);
-    console.log(response, "resGPT");
-    // Handle the response, e.g., send it back to the client
-  } catch (err) {
-    console.error("Error handling GPT response:", err);
-  }
-}
-*/
-
-// Example call to the getGpt function (uncomment and modify as needed)
-// getGpt("hi");
 
 // Handle GET requests
 app.get("*", async (req, res) => {

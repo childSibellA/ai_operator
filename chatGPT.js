@@ -1,4 +1,4 @@
-const OpenAI = require("openai");
+import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -8,7 +8,7 @@ const openai = new OpenAI({
 
 const assistant_id = process.env.ASSISTANT_ID;
 
-async function chatGPT(message, threads_id) {
+export async function chatGPT(message, threads_id) {
   if (threads_id === "no thread") {
     try {
       // Create a new empty thread
@@ -89,5 +89,3 @@ async function sendMessageToThread(threadId, message) {
     throw new Error("Failed to send message to thread");
   }
 }
-
-module.exports = { chatGPT };
