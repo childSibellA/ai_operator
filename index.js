@@ -25,19 +25,6 @@ app.get("*", async (req, res) => {
   }
 });
 
-// Handle POST requests
-// app.post("*", async (req, res) => {
-//   try {
-//     await handler(req); // Handle the request with your custom handler
-//     // console.log("POST request body:", req.body);
-//     res.send("POST request handled");
-//   } catch (error) {
-//     console.error("Error handling POST request:", error);
-//     res.status(500).send("Internal Server Error");
-//   }
-// });
-
-// Connect to the database (uncomment and modify as needed)
 connectDB();
 
 // Start the server

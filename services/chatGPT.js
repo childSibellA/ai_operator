@@ -1,19 +1,8 @@
-import OpenAI from "openai";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  organization: process.env.ORGANIZATION_ID,
-  project: process.env.PORJECT_ID,
-});
-
-const assistant_id = process.env.ASSISTANT_ID;
+import { openai, assistant_id } from "../config/openai.js";
 
 export async function chatGPT(message, threads_id) {
-  if (threads_id === "no thread") {
-    try {
+  try {
+    if (threads_id === "no thread") {
       // Create a new empty thread
       const emptyThread = await openai.beta.threads.create();
       console.log("New thread created with ID:", emptyThread.id);
@@ -26,18 +15,18 @@ export async function chatGPT(message, threads_id) {
         assistant_id: assistant_id,
       });
 
-      // Wait for a short period before checking the status
+      // Wait for the run to complete
       const messages = await waitForCompletion(emptyThread.id, run.id);
-      const sms = messages.data[0].content[0].text.value;
+      if (!messages)
+        throw new Error("Failed to retrieve messages after run completion.");
 
+      const sms =
+        messages.data[0]?.content[0]?.text?.value ||
+        "No message content found.";
       const result = { sms, threads_id: emptyThread.id };
       return result;
-    } catch (error) {
-      console.log("An error occurred:", error.message);
-    }
-  } else {
-    try {
-      // Send an initial message to the thread
+    } else {
+      // Send an initial message to the existing thread
       await sendMessageToThread(threads_id, message);
 
       // Start a run with the assistant
@@ -45,37 +34,64 @@ export async function chatGPT(message, threads_id) {
         assistant_id: assistant_id,
       });
 
-      // Wait for a short period before checking the status
+      // Wait for the run to complete
       const messages = await waitForCompletion(threads_id, run.id);
-      const sms = messages.data[0].content[0].text.value;
+      if (!messages)
+        throw new Error("Failed to retrieve messages after run completion.");
 
+      const sms =
+        messages.data[0]?.content[0]?.text?.value ||
+        "No message content found.";
       const result = { sms, threads_id };
       return result;
-    } catch (error) {
-      console.log("An error occurred:", error.message);
     }
+  } catch (error) {
+    console.error("An error occurred:", error.message);
+    throw error; // Propagate the error for higher-level handling
   }
 }
 
 async function waitForCompletion(threadId, runId) {
   try {
     let runStatus;
+    let run;
+
     do {
-      const run = await openai.beta.threads.runs.retrieve(threadId, runId);
+      run = await openai.beta.threads.runs.retrieve(threadId, runId);
       runStatus = run.status;
       console.log("Current run status:", runStatus);
 
-      // If not completed, wait for a bit before checking again
-      if (runStatus !== "completed") {
+      if (runStatus === "requires_action") {
+        const callId =
+          run?.required_action?.submit_tool_outputs?.tool_calls[0]?.id;
+        const functionOutput =
+          run?.required_action?.submit_tool_outputs?.tool_calls[0]?.function
+            ?.arguments;
+
+        if (callId && functionOutput) {
+          await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
+            tool_outputs: [
+              {
+                tool_call_id: callId,
+                output: functionOutput,
+              },
+            ],
+          });
+          console.log("Tool outputs submitted for function call:", callId);
+        } else {
+          throw new Error("Required tool call information is missing.");
+        }
+      } else if (runStatus !== "completed") {
         await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 2 seconds
       }
     } while (runStatus !== "completed");
 
-    // Once completed, get and log the messages
+    // Once completed, retrieve and return the messages
     const messages = await openai.beta.threads.messages.list(threadId);
     return messages;
   } catch (error) {
     console.error("Error while waiting for completion:", error.message);
+    throw error; // Propagate the error for higher-level handling
   }
 }
 
@@ -89,6 +105,6 @@ async function sendMessageToThread(threadId, message) {
     return threadMessages;
   } catch (error) {
     console.error("Failed to send message to thread:", error.message);
-    throw new Error("Failed to send message to thread");
+    throw error; // Ensure errors are properly thrown and handled
   }
 }
