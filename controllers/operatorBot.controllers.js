@@ -1,40 +1,35 @@
 import { chatGPT } from "../services/chatGPT.js";
-import { Customer } from "../models/Customer.js";
 import { telegramMsgSender } from "../middlewares/telegramMsgSender.js";
+import {
+  createNewCustomer,
+  getCustomer,
+} from "../utils/db/customer.handlers.js";
 
-async function getCustomer(chat_id) {
-  try {
-    const customer = await Customer.findOne({ chat_id });
-    return customer;
-  } catch {
-    return false;
-  }
-}
-
-async function getGpt(message, messageObj) {
+async function chatPreparation(message, messageObj) {
   const chat_id = messageObj.chat.id;
   try {
-    // Await the result of getCustomer since it is an asynchronous function
     let customer = await getCustomer(chat_id);
 
     if (!customer) {
-      // Create a new thread and save the customer
       const result = await chatGPT(message, "no thread");
       const { threads_id, sms } = result;
 
-      // Create a new customer entry
-      customer = new Customer({
-        threads_id,
+      const newCustomer = {
         chat_id,
-      });
+        threads_id,
+      };
 
-      // Save the new customer to the database
-      await customer.save();
+      customer = await createNewCustomer(newCustomer);
+
+      // Handle errors in case customer creation fails
+      if (!customer) {
+        throw new Error("Failed to create new customer.");
+      }
 
       return telegramMsgSender(messageObj, sms);
     } else {
       // Use the existing customer thread
-      const result = await chatGPT(message, customer?.threads_id);
+      const result = await chatGPT(message, customer.threads_id);
       const { sms } = result;
       return telegramMsgSender(messageObj, sms);
     }
@@ -45,10 +40,14 @@ async function getGpt(message, messageObj) {
 }
 
 export async function handlerTelegram(req, res) {
-  res.send("POST request handled");
-  const { body } = req;
-  const messageObj = body.message;
-  const messageText = messageObj.text || "";
+  try {
+    res.send("POST request handled");
+    const { body } = req;
+    const messageObj = body.message;
+    const messageText = messageObj.text || "";
 
-  getGpt(messageText, messageObj);
+    await chatPreparation(messageText, messageObj);
+  } catch (error) {
+    console.error("Error in Telegram handler:", error);
+  }
 }

@@ -1,4 +1,5 @@
 import { openai, assistant_id } from "../config/openai.js";
+import { editCustomer } from "../utils/db/customer.handlers.js";
 
 export async function chatGPT(message, threads_id) {
   try {
@@ -62,22 +63,29 @@ async function waitForCompletion(threadId, runId) {
       console.log("Current run status:", runStatus);
 
       if (runStatus === "requires_action") {
-        const callId =
-          run?.required_action?.submit_tool_outputs?.tool_calls[0]?.id;
-        const functionOutput =
-          run?.required_action?.submit_tool_outputs?.tool_calls[0]?.function
-            ?.arguments;
-
-        if (callId && functionOutput) {
-          await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
-            tool_outputs: [
-              {
-                tool_call_id: callId,
-                output: functionOutput,
-              },
-            ],
+        const toolOutputs =
+          run.required_action.submit_tool_outputs.tool_calls.map((tool) => {
+            if (tool.function.name === "get_customer_full_name") {
+              return {
+                tool_call_id: tool.id,
+                output: tool.function.arguments,
+              };
+            } else if (tool.function.name === "get_customer_phone_number") {
+              return {
+                tool_call_id: tool.id,
+                output: tool.function.arguments,
+              };
+            }
           });
-          console.log("Tool outputs submitted for function call:", callId);
+
+        editCustomer(threads_id, toolOutputs);
+        console.log(toolOutputs, "tool");
+
+        if (toolOutputs.length > 0) {
+          await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
+            tool_outputs: toolOutputs,
+          });
+          console.log("Tool outputs submitted successfully.");
         } else {
           throw new Error("Required tool call information is missing.");
         }

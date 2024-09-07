@@ -1,6 +1,6 @@
 {
-  "name": "telegrambotback",
-  "version": "1.0.0",
+  "name": "ai_operator",
+  "version": "0.2.0",
   "description": "",
   "type": "module",
   "main": "index.js",
