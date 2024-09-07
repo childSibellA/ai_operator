@@ -78,7 +78,7 @@ async function waitForCompletion(threadId, runId) {
             }
           });
 
-        editCustomer(threads_id, toolOutputs);
+        editCustomer(threadId, toolOutputs);
         console.log(toolOutputs, "tool");
 
         if (toolOutputs.length > 0) {

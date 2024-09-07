@@ -4,5 +4,6 @@ import * as operatorBotControllers from "../controllers/operatorBot.controllers.
 const router = Router();
 
 router.route("/telegram").post(operatorBotControllers.handlerTelegram);
+router.route("/facebook").post(operatorBotControllers.handlerFacebook);
 
 export default router;
