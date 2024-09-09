@@ -96,6 +96,7 @@ async function waitForCompletion(threadId, runId) {
 
     // Once completed, retrieve and return the messages
     const messages = await openai.beta.threads.messages.list(threadId);
+    console.log(messages, "messages");
     return messages;
   } catch (error) {
     console.error("Error while waiting for completion:", error.message);
