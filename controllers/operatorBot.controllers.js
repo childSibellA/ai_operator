@@ -60,6 +60,8 @@ export async function handlerTelegram(req, res) {
 }
 
 export async function handlerFacebook(req, res) {
+  res.status(200).send("EVENT_RECEIVED");
+  console.log("req", req.body);
   try {
     const { body } = req;
 
@@ -70,8 +72,6 @@ export async function handlerFacebook(req, res) {
 
       const assistantResponse = await chatPreparation(newMessage, chat_id);
       await facebookMsgSender(chat_id, assistantResponse);
-
-      res.status(200).send("EVENT_RECEIVED");
     } else {
       res.status(404).send("Event not from a page subscription");
     }

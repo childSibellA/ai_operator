@@ -4,7 +4,7 @@ const CustomerSchema = new mongoose.Schema(
   {
     chat_id: {
       type: String,
-      required: true,
+      required: false,
     },
     threads_id: {
       type: String,
@@ -22,10 +22,11 @@ const CustomerSchema = new mongoose.Schema(
     ],
     full_name: { type: String, required: false },
     gender: { type: String, required: false },
+    email_address: { type: String, required: false, unique: true },
     phone_number: {
       code: { type: String, default: "+995" },
       flag: { type: String, default: "ge" },
-      number: { type: String, required: false },
+      number: { type: String, required: false, unique: true },
     },
     WDYAHAU: {
       type: String,

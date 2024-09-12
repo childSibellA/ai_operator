@@ -15,6 +15,7 @@ export async function createNewCustomer(newCustomer) {
     const { chat_id, threads_id } = newCustomer;
 
     const customer = new Customer({
+      company_id: "66ca562ee370b0918a63669d",
       threads_id,
       chat_id,
     });
