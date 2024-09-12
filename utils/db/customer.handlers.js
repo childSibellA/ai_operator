@@ -16,6 +16,7 @@ export async function createNewCustomer(newCustomer) {
 
     const customer = new Customer({
       company_id: "66ca562ee370b0918a63669d",
+      operator_id: "66e2381a9f82da4fd0a0b74a",
       threads_id,
       chat_id,
     });
@@ -46,6 +47,7 @@ export async function editCustomer(threads_id, newDetails) {
       { threads_id },
       {
         company_id: "66ca562ee370b0918a63669d",
+        operator_id: "66e2381a9f82da4fd0a0b74a",
         full_name,
         "phone_number.number": phone_number, // Correct syntax for updating nested fields
       },
