@@ -45,6 +45,7 @@ export async function editCustomer(threads_id, newDetails) {
     const updatedCustomer = await Customer.findOneAndUpdate(
       { threads_id },
       {
+        company_id: "66ca562ee370b0918a63669d",
         full_name,
         "phone_number.number": phone_number, // Correct syntax for updating nested fields
       },
