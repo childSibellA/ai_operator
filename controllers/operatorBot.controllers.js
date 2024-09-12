@@ -60,7 +60,6 @@ export async function handlerTelegram(req, res) {
 }
 
 export async function handlerFacebook(req, res) {
-  res.status(200).send("EVENT_RECEIVED");
   console.log("req", req.body);
   try {
     const { body } = req;
@@ -69,9 +68,13 @@ export async function handlerFacebook(req, res) {
       const webhookEvent = body.entry[0].messaging[0];
       const chat_id = webhookEvent.sender.id;
       const newMessage = webhookEvent.message?.text || "";
-
-      const assistantResponse = await chatPreparation(newMessage, chat_id);
-      await facebookMsgSender(chat_id, assistantResponse);
+      if (newMessage) {
+        const assistantResponse = await chatPreparation(newMessage, chat_id);
+        await facebookMsgSender(chat_id, assistantResponse);
+      } else {
+        console.log(webhookEvent, "webhook");
+      }
+      res.status(200).send("EVENT_RECEIVED");
     } else {
       res.status(404).send("Event not from a page subscription");
     }
