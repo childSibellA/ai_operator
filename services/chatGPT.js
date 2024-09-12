@@ -6,7 +6,7 @@ export async function chatGPT(message, threads_id) {
     if (threads_id === "no thread") {
       // Create a new empty thread
       const emptyThread = await openai.beta.threads.create();
-      console.log("New thread created with ID:", emptyThread.id);
+      // console.log("New thread created with ID:", emptyThread.id);
 
       // Send an initial message to the thread
       await sendMessageToThread(emptyThread.id, message);
@@ -60,7 +60,7 @@ async function waitForCompletion(threadId, runId) {
     do {
       run = await openai.beta.threads.runs.retrieve(threadId, runId);
       runStatus = run.status;
-      console.log("Current run status:", runStatus);
+      // console.log("Current run status:", runStatus);
 
       if (runStatus === "requires_action") {
         const toolOutputs =
@@ -79,13 +79,13 @@ async function waitForCompletion(threadId, runId) {
           });
 
         editCustomer(threadId, toolOutputs);
-        console.log(toolOutputs, "tool");
+        // console.log(toolOutputs, "tool");
 
         if (toolOutputs.length > 0) {
           await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
             tool_outputs: toolOutputs,
           });
-          console.log("Tool outputs submitted successfully.");
+          // console.log("Tool outputs submitted successfully.");
         } else {
           throw new Error("Required tool call information is missing.");
         }
@@ -96,7 +96,7 @@ async function waitForCompletion(threadId, runId) {
 
     // Once completed, retrieve and return the messages
     const messages = await openai.beta.threads.messages.list(threadId);
-    console.log(messages, "messages");
+    // console.log(messages, "messages");
     return messages;
   } catch (error) {
     console.error("Error while waiting for completion:", error.message);
@@ -110,7 +110,7 @@ async function sendMessageToThread(threadId, message) {
       role: "user",
       content: message,
     });
-    console.log("Message sent to thread:", threadMessages);
+    // console.log("Message sent to thread:", threadMessages);
     return threadMessages;
   } catch (error) {
     console.error("Failed to send message to thread:", error.message);

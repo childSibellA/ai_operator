@@ -31,7 +31,6 @@ async function chatPreparation(message, chat_id) {
       // Use the existing customer thread
       const result = await chatGPT(message, customer.threads_id);
       const { sms } = result;
-      console.log(result, "result");
       return sms;
     }
   } catch (err) {
