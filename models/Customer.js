@@ -48,7 +48,7 @@ const CustomerSchema = new mongoose.Schema(
       number: {
         type: String,
         required: false,
-        unique: true,
+        unique: false,
         default: "ge",
         // match: /^\d{9}$/, // Assuming Georgian phone number format
         // trim: true,
