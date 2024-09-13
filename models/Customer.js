@@ -28,9 +28,9 @@ const CustomerSchema = new mongoose.Schema(
     email_address: {
       type: String,
       required: false,
-      unique: true,
-      match: /^\S+@\S+\.\S+$/, // Basic email regex validation
-      trim: true,
+      // unique: true,
+      // match: /^\S+@\S+\.\S+$/, // Basic email regex validation
+      // trim: true,
     },
     phone_number: {
       code: {
