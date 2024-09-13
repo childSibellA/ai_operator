@@ -40,7 +40,6 @@ const CustomerSchema = new mongoose.Schema(
         type: String,
         default: "+995",
         match: /^\+\d{1,3}$/, // Basic validation for country codes
-        unique: false,
       },
       flag: {
         type: String,
@@ -51,8 +50,7 @@ const CustomerSchema = new mongoose.Schema(
       number: {
         type: String,
         required: false,
-        unique: false,
-        default: "",
+        default: "", // Function call to generate a random phone number each time
       },
     },
     WDYAHAU: {
