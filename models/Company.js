@@ -18,6 +18,7 @@ const CompanySchema = mongoose.Schema(
     organization_id: { type: String, required: false },
     project_id: { type: String, required: false },
     assistant_id: { type: String, required: false },
+    page_access_token: { type: String, required: false },
     phone_number: {
       code: { type: String, default: "+995" },
       flag: { type: String, default: "ge" },

@@ -16,11 +16,11 @@ let messageColector = "";
 // Utility function to create a delay
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function chatPreparation(message, chat_id, recipient_id) {
+async function chatPreparation(message, chat_id, recipient_id, company) {
   try {
-    let customer = await getCustomer(chat_id);
-    let company = await getCompany(recipient_id);
     const { assistant_id, _id } = company;
+
+    let customer = await getCustomer(chat_id);
 
     if (!customer) {
       const result = await chatGPT(message, "no thread", assistant_id, _id);
@@ -97,6 +97,8 @@ export async function handlerFacebook(req, res) {
       console.log(webhookEvent, "webhook");
       const chat_id = webhookEvent.sender.id;
       const recipient_id = webhookEvent.recipient.id;
+      let company = await getCompany(recipient_id);
+      const { page_access_token } = company;
 
       const newMessage = webhookEvent.message?.text || "";
       await callTypingAPI(chat_id, "mark_seen");
@@ -107,12 +109,17 @@ export async function handlerFacebook(req, res) {
         const assistantResponse = await chatPreparation(
           newMessage,
           chat_id,
-          recipient_id
+          recipient_id,
+          company
         );
         await delay(2000);
         if (assistantResponse) {
-          await facebookMsgSender(chat_id, assistantResponse);
-          await callTypingAPI(chat_id, "typing_off");
+          await facebookMsgSender(
+            chat_id,
+            assistantResponse,
+            page_access_token
+          );
+          await callTypingAPI(chat_id, "typing_off", page_access_token);
         }
         // Process the new message through chatPreparation
       } else {
