@@ -1,6 +1,9 @@
 import { chatGPT } from "../services/chatGPT.js";
 import { telegramMsgSender } from "../middlewares/telegramMsgSender.js";
-import { facebookMsgSender } from "../middlewares/facebookMsgSender.js";
+import {
+  facebookMsgSender,
+  callTypingAPI,
+} from "../middlewares/facebookMsgSender.js";
 import {
   createNewCustomer,
   getCustomer,
@@ -14,6 +17,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function chatPreparation(message, chat_id) {
   try {
+    await callTypingAPI(chat_id, "typing_on");
     let customer = await getCustomer(chat_id);
 
     if (!customer) {
@@ -80,6 +84,7 @@ export async function handlerFacebook(req, res) {
   // console.log("req", req.query);
   // console.log("read", req.body?.entry[0]?.messaging[0]?.read?.watermark);
   try {
+    await callTypingAPI(chat_id, "mark_seen");
     const { body } = req;
 
     if (body.object === "page" && body.entry && body.entry[0].messaging) {
@@ -90,6 +95,7 @@ export async function handlerFacebook(req, res) {
       if (newMessage) {
         // Process the new message through chatPreparation
         const assistantResponse = await chatPreparation(newMessage, chat_id);
+        await callTypingAPI(chat_id, "typing_off");
         await facebookMsgSender(chat_id, assistantResponse);
       } else {
         console.log(webhookEvent, "webhook");
