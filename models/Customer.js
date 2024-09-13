@@ -37,6 +37,7 @@ const CustomerSchema = new mongoose.Schema(
         type: String,
         default: "+995",
         match: /^\+\d{1,3}$/, // Basic validation for country codes
+        unique: false,
       },
       flag: {
         type: String,
@@ -47,7 +48,8 @@ const CustomerSchema = new mongoose.Schema(
       number: {
         type: String,
         required: false,
-        // unique: true,
+        unique: true,
+        default: "ge",
         // match: /^\d{9}$/, // Assuming Georgian phone number format
         // trim: true,
       },

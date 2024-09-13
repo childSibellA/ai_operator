@@ -1,6 +1,9 @@
 import { chatGPT } from "../services/chatGPT.js";
 import { telegramMsgSender } from "../middlewares/telegramMsgSender.js";
-import { facebookMsgSender } from "../middlewares/facebookMsgSender.js";
+import {
+  callTypingAPI,
+  facebookMsgSender,
+} from "../middlewares/facebookMsgSender.js";
 import {
   createNewCustomer,
   getCustomer,
@@ -87,11 +90,17 @@ export async function handlerFacebook(req, res) {
       const webhookEvent = body.entry[0].messaging[0];
       const chat_id = webhookEvent.sender.id;
       const newMessage = webhookEvent.message?.text || "";
+      await callTypingAPI(chat_id, "mark_seen");
+      await callTypingAPI(chat_id, "typing_on");
 
       if (newMessage) {
-        // Process the new message through chatPreparation
+        // Await the delay of 2000 milliseconds (2 seconds)
         const assistantResponse = await chatPreparation(newMessage, chat_id);
+        await delay(2000);
+
+        // Process the new message through chatPreparation
         await facebookMsgSender(chat_id, assistantResponse);
+        await callTypingAPI(chat_id, "typing_off");
       } else {
         console.log(webhookEvent, "webhook");
       }

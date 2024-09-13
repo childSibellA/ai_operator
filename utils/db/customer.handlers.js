@@ -18,6 +18,8 @@ export async function createNewCustomer(newCustomer) {
     const existingChat = await Customer.findOne({ chat_id });
     const existingThread = await Customer.findOne({ threads_id });
 
+    console.log(existingChat, existingThread, "validation");
+
     // Proceed to create a new customer only if both are not found or are empty
     if (!existingChat && !existingThread) {
       const customer = new Customer({
