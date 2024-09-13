@@ -101,8 +101,8 @@ export async function handlerFacebook(req, res) {
       const { page_access_token } = company;
 
       const newMessage = webhookEvent.message?.text || "";
-      await callTypingAPI(chat_id, "mark_seen");
-      await callTypingAPI(chat_id, "typing_on");
+      await callTypingAPI(chat_id, "mark_seen", page_access_token);
+      await callTypingAPI(chat_id, "typing_on", page_access_token);
 
       if (newMessage) {
         // Await the delay of 2000 milliseconds (2 seconds)
@@ -113,7 +113,7 @@ export async function handlerFacebook(req, res) {
           company
         );
         await delay(2000);
-        if (assistantResponse) {
+        if (assistantResponse && page_access_token) {
           await facebookMsgSender(
             chat_id,
             assistantResponse,

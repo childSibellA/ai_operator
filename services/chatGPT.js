@@ -18,7 +18,11 @@ export async function chatGPT(message, threads_id, assistant_id, company_id) {
       });
 
       // Wait for the run to complete
-      const messages = await waitForCompletion(emptyThread.id, run.id);
+      const messages = await waitForCompletion(
+        emptyThread.id,
+        run.id,
+        company_id
+      );
       if (!messages)
         throw new Error("Failed to retrieve messages after run completion.");
 
@@ -37,7 +41,7 @@ export async function chatGPT(message, threads_id, assistant_id, company_id) {
       });
 
       // Wait for the run to complete
-      const messages = await waitForCompletion(threads_id, run.id);
+      const messages = await waitForCompletion(threads_id, run.id, company_id);
       if (!messages)
         throw new Error("Failed to retrieve messages after run completion.");
 
@@ -53,7 +57,7 @@ export async function chatGPT(message, threads_id, assistant_id, company_id) {
   }
 }
 
-async function waitForCompletion(threadId, runId) {
+async function waitForCompletion(threadId, runId, company_id) {
   try {
     let runStatus;
     let run;
@@ -88,6 +92,9 @@ async function waitForCompletion(threadId, runId) {
           });
           // console.log("Tool outputs submitted successfully.");
         } else {
+          await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
+            tool_outputs: [],
+          });
           throw new Error("Required tool call information is missing.");
         }
       } else if (runStatus !== "completed") {

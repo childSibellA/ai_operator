@@ -90,7 +90,7 @@ export async function editCustomer(threads_id, newDetails, company_id) {
       return null; // Return null if neither record exists
     }
   } catch (error) {
-    console.error("Error updating customer:", error); // Log the error for debugging
+    console.log("Error updating customer:", error); // Log the error for debugging
     return false; // Return false in case of any errors
   }
 }

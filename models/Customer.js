@@ -5,32 +5,35 @@ const CustomerSchema = new mongoose.Schema(
     chat_id: {
       type: String,
       required: false,
+      default: "",
     },
     threads_id: {
       type: String,
       required: false,
+      default: "",
     },
     telegram_name: {
       type: String,
       required: false,
+      default: "",
     },
     messages: [
       {
-        role: { type: String, required: false },
-        content: { type: String, required: false },
+        role: { type: String, required: false, default: "" },
+        content: { type: String, required: false, default: "" },
       },
     ],
-    full_name: { type: String, required: false },
+    full_name: { type: String, required: false, default: "" },
     gender: {
       type: String,
+      default: "other",
       enum: ["male", "female", "other"], // Common options, adjust as necessary
     },
     email_address: {
       type: String,
       required: false,
-      // unique: true,
-      // match: /^\S+@\S+\.\S+$/, // Basic email regex validation
-      // trim: true,
+      default: "",
+      trim: true,
     },
     phone_number: {
       code: {
@@ -49,13 +52,13 @@ const CustomerSchema = new mongoose.Schema(
         type: String,
         required: false,
         unique: false,
-        // match: /^\d{9}$/, // Assuming Georgian phone number format
-        // trim: true,
+        default: "",
       },
     },
     WDYAHAU: {
       type: String,
       enum: ["fb", "instagram", "other"], // Existing options, adjust if needed
+      default: "other",
     },
     status: {
       type: String,
@@ -64,8 +67,8 @@ const CustomerSchema = new mongoose.Schema(
     },
     national_ID_number: {
       type: String,
-      // trim: true,
-      // match: /^\d+$/, // Basic numeric validation, adjust regex for specific format
+      trim: true,
+      default: "",
     },
     connection_dates: [{ type: Date }], // Array of dates
     template_tour: { type: Boolean, default: false },
@@ -73,13 +76,17 @@ const CustomerSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxLength: 500, // Limit note length
+      default: "",
     },
     operator_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    allocator_id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    allocator_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     company_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
