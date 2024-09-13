@@ -35,6 +35,7 @@ async function chatPreparation(message, chat_id) {
     } else {
       const result = await chatGPT(message, customer.threads_id);
       const { sms } = result;
+      console.log(sms);
       return sms;
     }
   } catch (err) {
