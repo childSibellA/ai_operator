@@ -6,6 +6,12 @@ import {
   getCustomer,
 } from "../utils/db/customer.handlers.js";
 
+// messageColector remains a string
+let messageColector = "";
+
+// Utility function to create a delay
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function chatPreparation(message, chat_id) {
   try {
     let customer = await getCustomer(chat_id);
@@ -21,21 +27,19 @@ async function chatPreparation(message, chat_id) {
 
       customer = await createNewCustomer(newCustomer);
 
-      // Handle errors in case customer creation fails
       if (!customer) {
         throw new Error("Failed to create new customer.");
       }
 
       return sms;
     } else {
-      // Use the existing customer thread
       const result = await chatGPT(message, customer.threads_id);
       const { sms } = result;
       return sms;
     }
   } catch (err) {
     console.error("Error handling GPT response:", err);
-    return "Sorry, something went wrong.";
+    // return "Sorry, something went wrong.";
   }
 }
 
@@ -46,12 +50,23 @@ export async function handlerTelegram(req, res) {
     const messageObj = body.message;
     const messageText = messageObj.text || "";
 
-    const assistantResponse = await chatPreparation(
-      messageText,
-      messageObj.chat.id
-    );
+    // Append the new message to the messageColector string
+    messageColector += messageText;
 
-    await telegramMsgSender(messageObj, assistantResponse);
+    // Await the delay of 2000 milliseconds (2 seconds)
+    await delay(2000);
+
+    // Check if the messageColector has accumulated text
+    if (messageColector.length > 0) {
+      const assistantResponse = await chatPreparation(
+        messageColector,
+        messageObj.chat.id
+      );
+      await telegramMsgSender(messageObj, assistantResponse);
+
+      // Clear the messageColector after processing
+      messageColector = "";
+    }
   } catch (error) {
     console.error("Error in Telegram handler:", error);
     res.status(500).send("Error handling Telegram request.");
@@ -60,6 +75,10 @@ export async function handlerTelegram(req, res) {
 
 export async function handlerFacebook(req, res) {
   console.log("req", req.body);
+  // console.log("req", req.body?.entry[0]?.messaging);
+  // console.log("req", req.body?.entry[0]);
+  // console.log("req", req.query);
+  // console.log("read", req.body?.entry[0]?.messaging[0]?.read?.watermark);
   try {
     const { body } = req;
 
@@ -67,7 +86,9 @@ export async function handlerFacebook(req, res) {
       const webhookEvent = body.entry[0].messaging[0];
       const chat_id = webhookEvent.sender.id;
       const newMessage = webhookEvent.message?.text || "";
+
       if (newMessage) {
+        // Process the new message through chatPreparation
         const assistantResponse = await chatPreparation(newMessage, chat_id);
         await facebookMsgSender(chat_id, assistantResponse);
       } else {
