@@ -12,7 +12,7 @@ export function facebookAxios(requestBody) {
       },
     })
     .then((res) => {
-      console.log("Message sent successfully");
+      console.log("Message sent successfully", res);
     })
     .catch((err) => {
       if (err.response && err.response.data.error) {
