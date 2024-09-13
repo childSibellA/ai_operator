@@ -90,7 +90,7 @@ export async function handlerFacebook(req, res) {
       const chat_id = webhookEvent.sender.id;
       const newMessage = webhookEvent.message?.text || "";
       await callTypingAPI(chat_id, "mark_seen");
-      await callTypingAPI(chat_id, "typing_on");
+      // await callTypingAPI(chat_id, "typing_on");
 
       // if (newMessage) {
       //   // Process the new message through chatPreparation
