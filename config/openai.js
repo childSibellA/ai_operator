@@ -9,4 +9,4 @@ export const openai = new OpenAI({
   project: process.env.PORJECT_ID,
 });
 
-export const assistant_id = process.env.ASSISTANT_ID;
+export const defoult_assistant = process.env.ASSISTANT_ID;

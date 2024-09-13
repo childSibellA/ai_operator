@@ -12,7 +12,7 @@ export async function getCustomer(chat_id) {
 
 export async function createNewCustomer(newCustomer) {
   try {
-    const { chat_id, threads_id } = newCustomer;
+    const { chat_id, threads_id, company_id } = newCustomer;
 
     // Check if either chat_id or threads_id already exists
     const existingChat = await Customer.findOne({ chat_id });
@@ -23,7 +23,7 @@ export async function createNewCustomer(newCustomer) {
     // Proceed to create a new customer only if both are not found or are empty
     if (!existingChat && !existingThread) {
       const customer = new Customer({
-        company_id: "66ca562ee370b0918a63669d",
+        company_id,
         operator_id: "66e2381a9f82da4fd0a0b74a",
         threads_id,
         chat_id,
@@ -44,7 +44,7 @@ export async function createNewCustomer(newCustomer) {
   }
 }
 
-export async function editCustomer(threads_id, newDetails) {
+export async function editCustomer(threads_id, newDetails, company_id) {
   // Combine outputs from newDetails into a single object
   const combinedOutputs = {};
 
@@ -69,7 +69,7 @@ export async function editCustomer(threads_id, newDetails) {
       const updatedCustomer = await Customer.findOneAndUpdate(
         { threads_id },
         {
-          company_id: "66ca562ee370b0918a63669d",
+          company_id: company_id,
           operator_id: "66e2381a9f82da4fd0a0b74a",
           full_name,
           "phone_number.number": phone_number, // Correct syntax for nested fields

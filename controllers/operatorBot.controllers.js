@@ -1,4 +1,5 @@
 import { chatGPT } from "../services/chatGPT.js";
+import { getCompany } from "../utils/db/company.handlers.js";
 import { telegramMsgSender } from "../middlewares/telegramMsgSender.js";
 import {
   callTypingAPI,
@@ -15,17 +16,20 @@ let messageColector = "";
 // Utility function to create a delay
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function chatPreparation(message, chat_id) {
+async function chatPreparation(message, chat_id, recipient_id) {
   try {
     let customer = await getCustomer(chat_id);
+    let company = await getCompany(recipient_id);
+    const { assistant_id, _id } = company;
 
     if (!customer) {
-      const result = await chatGPT(message, "no thread");
+      const result = await chatGPT(message, "no thread", assistant_id, _id);
       const { threads_id, sms } = result;
 
       const newCustomer = {
         chat_id,
         threads_id,
+        company_id: _id,
       };
 
       customer = await createNewCustomer(newCustomer);
@@ -36,7 +40,12 @@ async function chatPreparation(message, chat_id) {
 
       return sms;
     } else {
-      const result = await chatGPT(message, customer.threads_id);
+      const result = await chatGPT(
+        message,
+        customer.threads_id,
+        assistant_id,
+        _id
+      );
       const { sms } = result;
       console.log(sms);
       return sms;
@@ -95,12 +104,17 @@ export async function handlerFacebook(req, res) {
 
       if (newMessage) {
         // Await the delay of 2000 milliseconds (2 seconds)
-        const assistantResponse = await chatPreparation(newMessage, chat_id);
+        const assistantResponse = await chatPreparation(
+          newMessage,
+          chat_id,
+          recipient_id
+        );
         await delay(2000);
-
+        if (assistantResponse) {
+          await facebookMsgSender(chat_id, assistantResponse);
+          await callTypingAPI(chat_id, "typing_off");
+        }
         // Process the new message through chatPreparation
-        await facebookMsgSender(chat_id, assistantResponse);
-        await callTypingAPI(chat_id, "typing_off");
       } else {
         console.log(webhookEvent, "webhook");
       }

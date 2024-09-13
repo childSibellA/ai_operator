@@ -1,7 +1,8 @@
-import { openai, assistant_id } from "../config/openai.js";
+import { openai, defoult_assistant } from "../config/openai.js";
 import { editCustomer } from "../utils/db/customer.handlers.js";
 
-export async function chatGPT(message, threads_id) {
+export async function chatGPT(message, threads_id, assistant_id, company_id) {
+  assistant_id = assistant_id || defoult_assistant;
   try {
     if (threads_id === "no thread") {
       // Create a new empty thread
@@ -13,7 +14,7 @@ export async function chatGPT(message, threads_id) {
 
       // Start a run with the assistant
       const run = await openai.beta.threads.runs.create(emptyThread.id, {
-        assistant_id: assistant_id,
+        assistant_id: assistant_id || defoult_assistant,
       });
 
       // Wait for the run to complete
@@ -32,7 +33,7 @@ export async function chatGPT(message, threads_id) {
 
       // Start a run with the assistant
       const run = await openai.beta.threads.runs.create(threads_id, {
-        assistant_id: assistant_id,
+        assistant_id: assistant_id || defoult_assistant,
       });
 
       // Wait for the run to complete
@@ -78,7 +79,7 @@ async function waitForCompletion(threadId, runId) {
             }
           });
 
-        editCustomer(threadId, toolOutputs);
+        editCustomer(threadId, toolOutputs, company_id);
         // console.log(toolOutputs, "tool");
 
         if (toolOutputs.length > 0) {
