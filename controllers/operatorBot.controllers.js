@@ -84,13 +84,13 @@ export async function handlerFacebook(req, res) {
   // console.log("req", req.query);
   // console.log("read", req.body?.entry[0]?.messaging[0]?.read?.watermark);
   try {
-    await callTypingAPI(chat_id, "mark_seen");
     const { body } = req;
 
     if (body.object === "page" && body.entry && body.entry[0].messaging) {
       const webhookEvent = body.entry[0].messaging[0];
       const chat_id = webhookEvent.sender.id;
       const newMessage = webhookEvent.message?.text || "";
+      await callTypingAPI(chat_id, "mark_seen");
 
       if (newMessage) {
         // Process the new message through chatPreparation
