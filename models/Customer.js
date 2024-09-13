@@ -47,9 +47,9 @@ const CustomerSchema = new mongoose.Schema(
       number: {
         type: String,
         required: false,
-        unique: true,
-        match: /^\d{9}$/, // Assuming Georgian phone number format
-        trim: true,
+        // unique: true,
+        // match: /^\d{9}$/, // Assuming Georgian phone number format
+        // trim: true,
       },
     },
     WDYAHAU: {
@@ -63,8 +63,8 @@ const CustomerSchema = new mongoose.Schema(
     },
     national_ID_number: {
       type: String,
-      trim: true,
-      match: /^\d+$/, // Basic numeric validation, adjust regex for specific format
+      // trim: true,
+      // match: /^\d+$/, // Basic numeric validation, adjust regex for specific format
     },
     connection_dates: [{ type: Date }], // Array of dates
     template_tour: { type: Boolean, default: false },
