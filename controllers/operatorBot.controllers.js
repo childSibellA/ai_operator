@@ -95,7 +95,7 @@ export async function handlerFacebook(req, res) {
       if (newMessage) {
         // Process the new message through chatPreparation
         const assistantResponse = await chatPreparation(newMessage, chat_id);
-        await callTypingAPI(chat_id, "typing_off");
+        // await callTypingAPI(chat_id, "typing_off");
         await facebookMsgSender(chat_id, assistantResponse);
       } else {
         console.log(webhookEvent, "webhook");
