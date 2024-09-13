@@ -17,7 +17,6 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function chatPreparation(message, chat_id) {
   try {
-    await callTypingAPI(chat_id, "typing_on");
     let customer = await getCustomer(chat_id);
 
     if (!customer) {
@@ -90,7 +89,8 @@ export async function handlerFacebook(req, res) {
       const webhookEvent = body.entry[0].messaging[0];
       const chat_id = webhookEvent.sender.id;
       const newMessage = webhookEvent.message?.text || "";
-      await callTypingAPI(chat_id, "mark_seen");
+      // await callTypingAPI(chat_id, "mark_seen");
+      await callTypingAPI(chat_id, "typing_on");
 
       if (newMessage) {
         // Process the new message through chatPreparation

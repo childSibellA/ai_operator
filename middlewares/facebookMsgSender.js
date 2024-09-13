@@ -14,6 +14,7 @@ export function facebookMsgSender(senderPsid, messageText) {
 }
 
 export function callTypingAPI(sender_psid, action) {
+  console.log(action, "action");
   const requestBody = {
     recipient: { id: sender_psid },
     sender_action: action, // Use 'typing_on', 'typing_off', or 'mark_seen'
