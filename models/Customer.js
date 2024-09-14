@@ -29,7 +29,7 @@ const CustomerSchema = new mongoose.Schema(
     },
     WDYAHAU: {
       type: String,
-      enum: ["fb", "instagram", "other"], // Add other options as needed
+      enum: ["fb", "instagram", "other", ""], // Add other options as needed
       required: false,
     },
     status: { type: String, default: "pending", required: false },
