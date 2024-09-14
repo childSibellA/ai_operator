@@ -35,28 +35,3 @@ export function facebookAxios(requestBody, access_token) {
       }
     });
 }
-
-export function removePersistentMenu() {
-  axios
-    .delete("https://graph.facebook.com/v20.0/me/messenger_profile", {
-      params: {
-        access_token: PAGE_ACCESS_TOKEN,
-      },
-      data: {
-        fields: ["persistent_menu"], // Field to remove the persistent menu
-      },
-    })
-    .then((res) => {
-      console.log("Persistent menu removed successfully:", res.data);
-    })
-    .catch((err) => {
-      if (err.response && err.response.data.error) {
-        console.error("API response error:", err.response.data.error);
-      } else {
-        console.error("Unable to remove persistent menu:", err.message);
-      }
-    });
-}
-
-// Call the function to remove the persistent menu
-removePersistentMenu();
