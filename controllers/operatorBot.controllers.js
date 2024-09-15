@@ -1,6 +1,9 @@
 import { chatGPT } from "../services/chatGPT.js";
 import { getCompany } from "../utils/db/company.handlers.js";
-import { telegramMsgSender } from "../middlewares/telegramMsgSender.js";
+import {
+  telegramMsgSender,
+  sendToAdmin,
+} from "../middlewares/telegramMsgSender.js";
 import {
   callTypingAPI,
   facebookMsgSender,
@@ -100,37 +103,38 @@ export async function handlerFacebook(req, res) {
       const chat_id = webhookEvent.sender.id;
       const recipient_id = webhookEvent.recipient.id;
       let company = await getCompany(recipient_id);
-      // if (company) {
-      const { page_access_token } = company;
+      if (company) {
+        const { page_access_token } = company;
 
-      const newMessage = webhookEvent.message?.text || "";
-      await callTypingAPI(chat_id, "mark_seen", page_access_token);
-      await callTypingAPI(chat_id, "typing_on", page_access_token);
+        const newMessage = webhookEvent.message?.text || "";
+        await callTypingAPI(chat_id, "mark_seen", page_access_token);
+        await callTypingAPI(chat_id, "typing_on", page_access_token);
 
-      if (newMessage) {
-        // Await the delay of 2000 milliseconds (2 seconds)
-        const assistantResponse = await chatPreparation(
-          newMessage,
-          chat_id,
-          recipient_id,
-          company
-        );
-        await delay(2000);
-        if (assistantResponse && page_access_token) {
-          await facebookMsgSender(
+        if (newMessage) {
+          // Await the delay of 2000 milliseconds (2 seconds)
+          const assistantResponse = await chatPreparation(
+            newMessage,
             chat_id,
-            assistantResponse,
-            page_access_token
+            recipient_id,
+            company
           );
-          await callTypingAPI(chat_id, "typing_off", page_access_token);
+          await delay(2000);
+          if (assistantResponse && page_access_token) {
+            await facebookMsgSender(
+              chat_id,
+              assistantResponse,
+              page_access_token
+            );
+            await callTypingAPI(chat_id, "typing_off", page_access_token);
+          }
+          // Process the new message through chatPreparation
+        } else {
+          console.log(webhookEvent, "webhook");
         }
-        // Process the new message through chatPreparation
       } else {
-        console.log(webhookEvent, "webhook");
+        sendToAdmin(recipient_id);
+        console.log(`new user ID is ${recipient_id}`);
       }
-      // } else {
-      //   console.log(`new user ID is ${recipient_id}`);
-      // }
     } else {
       res.status(404).send("Event not from a page subscription");
     }
