@@ -1,8 +1,8 @@
 import { telegramAxios } from "../apis/telegramAxios.js";
 
-export function telegramMsgSender(messageObj, messageText) {
+export function telegramMsgSender(chat_id, messageText) {
   return telegramAxios().get("sendMessage", {
-    chat_id: messageObj.chat.id,
+    chat_id,
     text: messageText,
   });
 }

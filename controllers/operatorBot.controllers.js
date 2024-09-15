@@ -61,6 +61,7 @@ export async function handlerTelegram(req, res) {
     res.send("POST request handled");
     const { body } = req;
     const messageObj = body.message;
+    const chat_id = messageObj.chat.id;
     const messageText = messageObj.text || "";
 
     // Append the new message to the messageColector string
@@ -75,7 +76,7 @@ export async function handlerTelegram(req, res) {
         messageColector,
         messageObj.chat.id
       );
-      await telegramMsgSender(messageObj, assistantResponse);
+      await telegramMsgSender(chat_id, assistantResponse);
 
       // Clear the messageColector after processing
       messageColector = "";
