@@ -135,7 +135,7 @@ export async function handlerFacebook(req, res) {
           console.log(webhookEvent, "webhook");
         }
       } else {
-        sendToAdmin(recipient_id);
+        sendToAdmin(`new user ID is ${recipient_id}`);
         console.log(`new user ID is ${recipient_id}`);
       }
     } else {
