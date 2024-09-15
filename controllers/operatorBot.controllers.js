@@ -68,19 +68,19 @@ export async function handlerTelegram(req, res) {
     messageColector += messageText;
 
     // Await the delay of 2000 milliseconds (2 seconds)
-    await delay(2000);
+    // await delay(2000);
 
-    // Check if the messageColector has accumulated text
-    if (messageColector.length > 0) {
-      const assistantResponse = await chatPreparation(
-        messageColector,
-        messageObj.chat.id
-      );
-      await telegramMsgSender(chat_id, assistantResponse);
+    // // Check if the messageColector has accumulated text
+    // if (messageColector.length > 0) {
+    //   const assistantResponse = await chatPreparation(
+    //     messageColector,
+    //     messageObj.chat.id
+    //   );
+    //   await telegramMsgSender(chat_id, assistantResponse);
 
-      // Clear the messageColector after processing
-      messageColector = "";
-    }
+    //   // Clear the messageColector after processing
+    //   messageColector = "";
+    // }
   } catch (error) {
     console.error("Error in Telegram handler:", error);
     res.status(500).send("Error handling Telegram request.");
