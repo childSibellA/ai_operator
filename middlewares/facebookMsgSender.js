@@ -20,5 +20,5 @@ export function callTypingAPI(sender_psid, action, page_access_token) {
     sender_action: action, // Use 'typing_on', 'typing_off', or 'mark_seen'
   };
 
-  facebookAxios(requestBody, page_access_token);
+  facebookAxios(requestBody, page_access_token, action);
 }

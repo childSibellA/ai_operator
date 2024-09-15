@@ -4,7 +4,7 @@ dotenv.config();
 
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
-export function facebookAxios(requestBody, access_token) {
+export function facebookAxios(requestBody, access_token, action) {
   axios
     .post("https://graph.facebook.com/v20.0/me/messages", requestBody, {
       params: {
@@ -12,7 +12,11 @@ export function facebookAxios(requestBody, access_token) {
       },
     })
     .then((res) => {
-      console.log("Message sent successfully", res.data);
+      if (action) {
+        console.log(`${action} sent successfully`, res.data);
+      } else {
+        console.log("Message sent successfully", res.data);
+      }
     })
     .catch((err) => {
       if (err.response && err.response.data.error) {
