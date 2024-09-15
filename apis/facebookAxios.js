@@ -6,24 +6,11 @@ const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 export function facebookAxios(requestBody, access_token) {
   axios
-    .post(
-      "https://graph.facebook.com/v20.0/me/messages",
-      requestBody,
-      {
-        persistent_menu: [
-          {
-            locale: "default",
-            composer_input_disabled: false,
-            call_to_actions: [], // Empty array to remove all buttons
-          },
-        ],
+    .post("https://graph.facebook.com/v20.0/me/messages", requestBody, {
+      params: {
+        access_token,
       },
-      {
-        params: {
-          access_token,
-        },
-      }
-    )
+    })
     .then((res) => {
       console.log("Message sent successfully", res.data);
     })
