@@ -63,7 +63,7 @@ export async function handlerTelegram(req, res) {
     const messageObj = body.message;
     const chat_id = messageObj.chat.id;
     const messageText = messageObj.text || "";
-
+    console.log(body, "body");
     // Append the new message to the messageColector string
     messageColector += messageText;
 
