@@ -104,7 +104,7 @@ export async function handlerFacebook(req, res) {
       const recipient_id = webhookEvent.recipient.id;
       let company = await getCompany(recipient_id);
       console.log(company, "company");
-      if (company.length > 0) {
+      if (company) {
         const { page_access_token } = company;
 
         const newMessage = webhookEvent.message?.text || "";
