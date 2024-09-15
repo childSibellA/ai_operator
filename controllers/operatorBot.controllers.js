@@ -103,7 +103,7 @@ export async function handlerFacebook(req, res) {
       const chat_id = webhookEvent.sender.id;
       const recipient_id = webhookEvent.recipient.id;
       let company = await getCompany(recipient_id);
-      if (company) {
+      if (company.length > 0) {
         const { page_access_token } = company;
 
         const newMessage = webhookEvent.message?.text || "";
