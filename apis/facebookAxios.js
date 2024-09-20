@@ -28,6 +28,7 @@ export function facebookAxiosPostMessage(requestBody, access_token, action) {
 }
 
 export async function facebookAxiosGetUser(params, userId) {
+  console.log(params, "params");
   try {
     // API call to get user info
     const response = await axios.get(
