@@ -19,10 +19,8 @@ export function facebookMsgSender(senderPsid, messageText, page_access_token) {
 export function getUserById(sender_psid, fields, access_token) {
   console.log(sender_psid, "sender_psid");
   const params = {
-    params: {
-      fields,
-      access_token,
-    },
+    fields,
+    access_token,
   };
 
   facebookAxiosGetUser(params, sender_psid);
