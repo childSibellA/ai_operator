@@ -23,7 +23,8 @@ export function getUserById(sender_psid, fields, access_token) {
     access_token,
   };
 
-  facebookAxiosGetUser(params, sender_psid);
+  const result = facebookAxiosGetUser(params, sender_psid);
+  return result;
 }
 
 export function callTypingAPI(sender_psid, action, page_access_token) {

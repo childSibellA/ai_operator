@@ -40,7 +40,7 @@ export async function facebookAxiosGetUser(params, userId) {
 
     // Log the user information
     console.log("User Information:", response.data);
-    // return response.data; // Returns the user information
+    return response.data; // Returns the user information
   } catch (error) {
     console.log("Error fetching user information:", error);
   }
