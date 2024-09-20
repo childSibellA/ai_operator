@@ -19,7 +19,7 @@ let messageColector = "";
 // Utility function to create a delay
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function chatPreparation(message, chat_id, recipient_id, company) {
+async function chatPreparation(message, chat_id, company) {
   try {
     const { assistant_id, _id } = company;
 
@@ -92,7 +92,7 @@ export async function handlerTelegram(req, res) {
 
 export async function handlerFacebook(req, res) {
   res.status(200).send("EVENT_RECEIVED");
-  console.log("req", req.body);
+  console.log("body", req.body);
   // console.log("read", req.body?.entry[0]?.messaging[0]?.read?.watermark);
   try {
     const { body } = req;
@@ -103,11 +103,13 @@ export async function handlerFacebook(req, res) {
 
       const chat_id = webhookEvent.sender.id;
       const recipient_id = webhookEvent.recipient.id;
-
+      const fields =
+        "id,name,first_name,last_name,profile_pic,locale,timezone,gender";
       let company = await getCompany(recipient_id);
-      console.log(company, "company");
+
       if (company) {
         const { page_access_token } = company;
+        getUserById(chat_id, fields, page_access_token);
 
         const newMessage = webhookEvent.message?.text || "";
         await callTypingAPI(chat_id, "mark_seen", page_access_token);

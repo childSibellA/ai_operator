@@ -1,4 +1,4 @@
-import { facebookAxios } from "../apis/facebookAxios.js";
+import { facebookAxiosPostMessage } from "../apis/facebookAxios.js";
 
 export function facebookMsgSender(senderPsid, messageText, page_access_token) {
   const requestBody = {
@@ -10,7 +10,19 @@ export function facebookMsgSender(senderPsid, messageText, page_access_token) {
     },
   };
 
-  facebookAxios(requestBody, page_access_token);
+  facebookAxiosPostMessage(requestBody, page_access_token);
+}
+
+export function getUserById(sender_psid, fields, access_token) {
+  console.log(sender_psid, "sender_psid");
+  const params = {
+    params: {
+      fields,
+      access_token,
+    },
+  };
+
+  facebookAxiosGetUser(params, sender_psid);
 }
 
 export function callTypingAPI(sender_psid, action, page_access_token) {
@@ -20,5 +32,5 @@ export function callTypingAPI(sender_psid, action, page_access_token) {
     sender_action: action, // Use 'typing_on', 'typing_off', or 'mark_seen'
   };
 
-  facebookAxios(requestBody, page_access_token, action);
+  facebookAxiosPostMessage(requestBody, page_access_token, action);
 }

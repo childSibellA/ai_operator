@@ -4,7 +4,7 @@ dotenv.config();
 
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
-export function facebookAxios(requestBody, access_token, action) {
+export function facebookAxiosPostMessage(requestBody, access_token, action) {
   axios
     .post("https://graph.facebook.com/v20.0/me/messages", requestBody, {
       params: {
@@ -25,4 +25,22 @@ export function facebookAxios(requestBody, access_token, action) {
         console.error("Unable to send message:", err.message);
       }
     });
+}
+
+export async function facebookAxiosGetUser(params, userId) {
+  try {
+    // API call to get user info
+    const response = await axios.get(`https://graph.facebook.com/${userId}`, {
+      params,
+    });
+
+    // Log the user information
+    console.log("User Information:", response.data);
+    return response.data; // Returns the user information
+  } catch (error) {
+    console.error(
+      "Error fetching user information:",
+      error.response ? error.response.data : error.message
+    );
+  }
 }
