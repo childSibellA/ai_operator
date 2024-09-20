@@ -109,7 +109,7 @@ export async function handlerFacebook(req, res) {
 
       if (company) {
         const { page_access_token } = company;
-        getUserById(chat_id, fields, page_access_token);
+        // getUserById(chat_id, fields, page_access_token);
 
         const newMessage = webhookEvent.message?.text || "";
         await callTypingAPI(chat_id, "mark_seen", page_access_token);
