@@ -30,17 +30,17 @@ export function facebookAxiosPostMessage(requestBody, access_token, action) {
 export async function facebookAxiosGetUser(params, userId) {
   try {
     // API call to get user info
-    const response = await axios.get(`https://graph.facebook.com/${userId}`, {
-      params,
-    });
+    const response = await axios.get(
+      `https://graph.facebook.com/v20.0/${userId}`,
+      {
+        params,
+      }
+    );
 
     // Log the user information
     console.log("User Information:", response.data);
-    return response.data; // Returns the user information
+    // return response.data; // Returns the user information
   } catch (error) {
-    console.error(
-      "Error fetching user information:",
-      error.response ? error.response.data : error.message
-    );
+    console.log("Error fetching user information:");
   }
 }
