@@ -1,4 +1,7 @@
-import { facebookAxiosPostMessage } from "../apis/facebookAxios.js";
+import {
+  facebookAxiosGetUser,
+  facebookAxiosPostMessage,
+} from "../apis/facebookAxios.js";
 
 export function facebookMsgSender(senderPsid, messageText, page_access_token) {
   const requestBody = {
