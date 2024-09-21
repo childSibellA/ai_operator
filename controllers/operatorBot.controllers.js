@@ -127,7 +127,7 @@ export async function handlerFacebook(req, res) {
         await callTypingAPI(chat_id, "mark_seen", page_access_token);
         await callTypingAPI(chat_id, "typing_on", page_access_token);
 
-        if (newMessage) {
+        if (newMessage && userFBInfo) {
           // Await the delay of 2000 milliseconds (2 seconds)
           const assistantResponse = await chatPreparation(
             newMessage,
