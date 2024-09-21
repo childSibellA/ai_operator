@@ -22,16 +22,6 @@ let messageColector = "";
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function chatPreparation(message, chat_id, company, userFBInfo) {
-  console.log(
-    message,
-    "mesage",
-    chat_id,
-    "chatId",
-    company,
-    "company",
-    userFBInfo,
-    "uaerInfo"
-  );
   try {
     const { assistant_id, _id } = company;
 
@@ -105,7 +95,7 @@ export async function handlerTelegram(req, res) {
 export async function handlerFacebook(req, res) {
   res.status(200).send("EVENT_RECEIVED");
   console.log("body", req.body);
-  // console.log("read", req.body?.entry[0]?.messaging[0]?.read?.watermark);
+
   try {
     const { body } = req;
 
@@ -121,32 +111,41 @@ export async function handlerFacebook(req, res) {
         const { page_access_token } = company;
         const fields =
           "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
-        const userFBInfo = getUserById(chat_id, fields, page_access_token);
 
         const newMessage = webhookEvent.message?.text || "";
         await callTypingAPI(chat_id, "mark_seen", page_access_token);
         await callTypingAPI(chat_id, "typing_on", page_access_token);
 
-        if (newMessage && userFBInfo.id) {
-          // Await the delay of 2000 milliseconds (2 seconds)
-          const assistantResponse = await chatPreparation(
-            newMessage,
-            chat_id,
-            company,
-            userFBInfo
-          );
-          await delay(2000);
-          if (assistantResponse && page_access_token) {
-            await facebookMsgSender(
+        try {
+          // Await the result of getUserById
+          // const userFBInfo = await getUserById(
+          //   chat_id,
+          //   fields,
+          //   page_access_token
+          // );
+
+          if (newMessage) {
+            // Await the response from chatPreparation
+            const assistantResponse = await chatPreparation(
+              newMessage,
               chat_id,
-              assistantResponse,
-              page_access_token
+              company
             );
-            await callTypingAPI(chat_id, "typing_off", page_access_token);
+            await delay(2000); // Delay of 2 seconds
+
+            if (assistantResponse && page_access_token) {
+              await facebookMsgSender(
+                chat_id,
+                assistantResponse,
+                page_access_token
+              );
+              await callTypingAPI(chat_id, "typing_off", page_access_token);
+            }
+          } else {
+            console.log(webhookEvent, "webhook");
           }
-          // Process the new message through chatPreparation
-        } else {
-          console.log(webhookEvent, "webhook");
+        } catch (err) {
+          console.error("Error fetching user info or sending message:", err);
         }
       } else {
         sendToAdmin(`new user ID is ${recipient_id}`);
