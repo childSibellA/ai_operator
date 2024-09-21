@@ -21,20 +21,13 @@ let messageColector = "";
 // Utility function to create a delay
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function chatPreparation(message, chat_id, company, userFBInfo) {
-  console.log(
-    message,
-    "mesage",
-    chat_id,
-    "chatId",
-    company,
-    "company",
-    userFBInfo,
-    "uaerInfo"
-  );
+async function chatPreparation(message, chat_id, company) {
+  const { assistant_id, _id, page_access_token } = company;
+  const fields =
+    "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
+  const userFBInfo = getUserById(chat_id, fields, page_access_token);
+  console.log(userFBInfo, "userfginfo");
   try {
-    const { assistant_id, _id } = company;
-
     let customer = await getCustomer(chat_id);
 
     if (!customer) {
@@ -119,21 +112,17 @@ export async function handlerFacebook(req, res) {
 
       if (company) {
         const { page_access_token } = company;
-        const fields =
-          "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
-        const userFBInfo = getUserById(chat_id, fields, page_access_token);
 
         const newMessage = webhookEvent.message?.text || "";
         await callTypingAPI(chat_id, "mark_seen", page_access_token);
         await callTypingAPI(chat_id, "typing_on", page_access_token);
 
-        if (newMessage && userFBInfo) {
+        if (newMessage) {
           // Await the delay of 2000 milliseconds (2 seconds)
           const assistantResponse = await chatPreparation(
             newMessage,
             chat_id,
-            company,
-            userFBInfo
+            company
           );
           await delay(2000);
           if (assistantResponse && page_access_token) {
