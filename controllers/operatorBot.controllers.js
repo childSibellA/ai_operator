@@ -13,6 +13,7 @@ import {
   createNewCustomer,
   getCustomer,
 } from "../utils/db/customer.handlers.js";
+import { compareSync } from "bcrypt";
 
 // messageColector remains a string
 let messageColector = "";
@@ -20,7 +21,17 @@ let messageColector = "";
 // Utility function to create a delay
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function chatPreparation(message, chat_id, company) {
+async function chatPreparation(message, chat_id, company, userFBInfo) {
+  console.log(
+    message,
+    "mesage",
+    chat_id,
+    "chatId",
+    company,
+    "company",
+    userFBInfo,
+    "uaerInfo"
+  );
   try {
     const { assistant_id, _id } = company;
 
@@ -104,13 +115,13 @@ export async function handlerFacebook(req, res) {
 
       const chat_id = webhookEvent.sender.id;
       const recipient_id = webhookEvent.recipient.id;
-      const fields =
-        "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
       let company = await getCompany(recipient_id);
 
       if (company) {
         const { page_access_token } = company;
-        getUserById(chat_id, fields, page_access_token);
+        const fields =
+          "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
+        const userFBInfo = getUserById(chat_id, fields, page_access_token);
 
         const newMessage = webhookEvent.message?.text || "";
         await callTypingAPI(chat_id, "mark_seen", page_access_token);
@@ -122,7 +133,8 @@ export async function handlerFacebook(req, res) {
             newMessage,
             chat_id,
             recipient_id,
-            company
+            company,
+            userFBInfo
           );
           await delay(2000);
           if (assistantResponse && page_access_token) {
