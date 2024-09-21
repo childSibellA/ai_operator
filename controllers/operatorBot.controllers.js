@@ -132,7 +132,6 @@ export async function handlerFacebook(req, res) {
           const assistantResponse = await chatPreparation(
             newMessage,
             chat_id,
-            recipient_id,
             company,
             userFBInfo
           );
