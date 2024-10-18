@@ -107,7 +107,7 @@ export async function handlerFacebook(req, res) {
       const recipient_id = webhookEvent.recipient.id;
       let company = await getCompany(recipient_id);
       if (!company.bot_active) {
-        console.log(company.bot_active, "bot status");
+        console.log(company, "bot status");
         return;
       }
 
