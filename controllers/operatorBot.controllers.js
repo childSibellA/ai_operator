@@ -108,14 +108,14 @@ export async function handlerFacebook(req, res) {
       let company = await getCompany(recipient_id);
 
       if (company) {
-        const { page_access_token, bot_active, bot_status } = company;
+        const { page_access_token, bot_active } = company;
 
         if (!bot_active) {
           // Stop the process if bot_active is false
           console.log(
             company,
+            page_access_token,
             bot_active,
-            bot_status,
             "Bot is not active. Stopping further actions."
           );
           return; // Exit the function early to prevent further processing
