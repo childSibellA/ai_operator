@@ -117,6 +117,7 @@ export async function handlerFacebook(req, res) {
         }
 
         console.log(bot_active, "bot status");
+
         const fields =
           "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
 
