@@ -35,6 +35,17 @@ const CompanySchema = mongoose.Schema(
       enum: ["active", "inactive"],
       default: "active",
     },
+    bot_active: {
+      type: Boolean,
+      default: true,
+    },
+    sections: {
+      customers: Boolean,
+      expenses: Boolean,
+      invoices: Boolean,
+      orders: Boolean,
+      services: Boolean,
+    },
   },
   {
     timestamps: true, // Automatically add createdAt and updatedAt timestamps
