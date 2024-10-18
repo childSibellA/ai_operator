@@ -110,10 +110,13 @@ export async function handlerFacebook(req, res) {
       if (company) {
         const { page_access_token, bot_active } = company;
 
-        if (bot_active) {
-          console.log(bot_active, "bot status");
-          return;
+        if (!bot_active) {
+          // Stop the process if bot_active is false
+          console.log("Bot is not active. Stopping further actions.");
+          return; // Exit the function early to prevent further processing
         }
+
+        console.log(bot_active, "bot status");
         const fields =
           "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
 
