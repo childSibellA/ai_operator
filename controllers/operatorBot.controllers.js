@@ -108,11 +108,12 @@ export async function handlerFacebook(req, res) {
       let company = await getCompany(recipient_id);
 
       if (company) {
-        if (!company.bot_active) {
-          console.log(company.bot_active, "bot status");
+        const { page_access_token, bot_active } = company;
+
+        if (bot_active) {
+          console.log(bot_active, "bot status");
           return;
         }
-        const { page_access_token } = company;
         const fields =
           "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
 
