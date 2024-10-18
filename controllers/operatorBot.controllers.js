@@ -112,7 +112,11 @@ export async function handlerFacebook(req, res) {
 
         if (!bot_active) {
           // Stop the process if bot_active is false
-          console.log(company, "Bot is not active. Stopping further actions.");
+          console.log(
+            company,
+            bot_active,
+            "Bot is not active. Stopping further actions."
+          );
           return; // Exit the function early to prevent further processing
         }
 
