@@ -13,7 +13,6 @@ import {
   createNewCustomer,
   getCustomer,
 } from "../utils/db/customer.handlers.js";
-import { compareSync } from "bcrypt";
 
 // messageColector remains a string
 let messageColector = "";
@@ -94,7 +93,7 @@ export async function handlerTelegram(req, res) {
 
 export async function handlerFacebook(req, res) {
   res.status(200).send("EVENT_RECEIVED");
-  console.log("body", req.body);
+  console.log("body", req.body.entry);
 
   try {
     const { body } = req;
@@ -111,7 +110,6 @@ export async function handlerFacebook(req, res) {
         const { page_access_token, bot_active } = company;
 
         if (!bot_active) {
-          // Stop the process if bot_active is false
           console.log(
             company,
             page_access_token,
@@ -127,43 +125,43 @@ export async function handlerFacebook(req, res) {
           "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
 
         const newMessage = webhookEvent.message?.text || "";
-        await callTypingAPI(chat_id, "mark_seen", page_access_token);
-        await callTypingAPI(chat_id, "typing_on", page_access_token);
 
         try {
-          // Await the result of getUserById
-          // const userFBInfo = await getUserById(
-          //   chat_id,
-          //   fields,
-          //   page_access_token
-          // );
-
           if (newMessage) {
-            // Await the response from chatPreparation
+            // Mark message as seen and typing action
+            await callTypingAPI(chat_id, "mark_seen", page_access_token);
+            await callTypingAPI(chat_id, "typing_on", page_access_token);
+
+            // Prepare the assistant response
             const assistantResponse = await chatPreparation(
               newMessage,
               chat_id,
               company
             );
+
             await delay(2000); // Delay of 2 seconds
 
             if (assistantResponse && page_access_token) {
+              // Send the assistant's response back
               await facebookMsgSender(
                 chat_id,
                 assistantResponse,
                 page_access_token
               );
+
+              // // Stop typing action
               await callTypingAPI(chat_id, "typing_off", page_access_token);
             }
           } else {
-            console.log(webhookEvent, "webhook");
+            console.log("No new message content to process.");
           }
         } catch (err) {
           console.error("Error fetching user info or sending message:", err);
         }
       } else {
-        sendToAdmin(`new user ID is ${recipient_id}`);
-        console.log(`new user ID is ${recipient_id}`);
+        // Handle case where company is not found
+        sendToAdmin(`New user ID is ${recipient_id}`);
+        console.log(`New user ID is ${recipient_id}`);
       }
     } else {
       res.status(404).send("Event not from a page subscription");
