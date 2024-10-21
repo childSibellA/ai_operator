@@ -18,6 +18,7 @@ const CustomerSchema = new mongoose.Schema(
       {
         role: { type: String, required: false },
         content: { type: String, required: false },
+        image_url: { type: String, require: false },
       },
     ],
     full_name: { type: String, required: false },

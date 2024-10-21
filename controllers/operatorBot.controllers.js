@@ -1,4 +1,4 @@
-import { createChatWithTools } from "../services/LLM.js";
+import { createChatWithTools, imageInputLLM } from "../services/LLM.js";
 import { getCompany } from "../utils/db/company.handlers.js";
 import {
   telegramMsgSender,
@@ -142,7 +142,8 @@ export async function handlerTelegram(req, res) {
 
 export async function handlerFacebook(req, res) {
   res.status(200).send("EVENT_RECEIVED");
-  console.log("body", req.body.entry);
+  console.log("body", req.body.object);
+  console.log("body", req.body.entry[0].messaging[0].message);
 
   try {
     const { body } = req;
@@ -155,7 +156,7 @@ export async function handlerFacebook(req, res) {
       const recipient_id = webhookEvent.recipient.id;
       let company = await getCompany(recipient_id);
       if (company) {
-        const { page_access_token, bot_active, _id } = company;
+        const { page_access_token, bot_active, apiKey } = company;
 
         if (!bot_active) {
           console.log(
@@ -171,14 +172,14 @@ export async function handlerFacebook(req, res) {
           "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
 
         const newMessage = webhookEvent.message?.text || "";
+        const newImage = webhookEvent.message?.attachments || "";
 
         try {
+          const customer = await getCustomer(chat_id);
           if (newMessage) {
             // Mark message as seen and typing action
             await callTypingAPI(chat_id, "mark_seen", page_access_token);
             await callTypingAPI(chat_id, "typing_on", page_access_token);
-
-            const customer = await getCustomer(chat_id);
 
             if (!customer) {
               // Handle new customer
@@ -187,13 +188,33 @@ export async function handlerFacebook(req, res) {
               // Handle existing customer
               await handleExistingCustomer(customer, newMessage, company);
             }
+          }
+          if (newImage) {
+            console.log(newImage[0].payload.url, "image");
 
-            // await delay(2000); // Delay of 2 seconds
-            //   // // Stop typing action
-            //   await callTypingAPI(chat_id, "typing_off", page_access_token);
-            // }
+            let image_url = newImage[0].payload.url;
+            let role = "user"; // Declare role here
+
+            try {
+              // Call imageInputLLM and await the result
+              const image_descr = await imageInputLLM(apiKey, image_url);
+              let full_descr = `მომხმარებელმა სურათი გამოგვიგზავნა რომლის აღწერაა:${image_descr}`;
+              // Update the customer with the new image description
+              const updatedCustomer = await addNewMessage(
+                customer,
+                full_descr,
+                role,
+                image_url
+              );
+
+              console.log(updatedCustomer, "updated customer");
+            } catch (error) {
+              console.error("Error processing image:", error);
+            }
+
+            console.log(image_descr, "image");
           } else {
-            console.log("No new message content to process.");
+            console.log("No new message or image content to process.");
           }
         } catch (err) {
           console.error("Error fetching user info or sending message:", err);

@@ -10,13 +10,14 @@ export async function getCustomer(chat_id) {
   }
 }
 
-export async function addNewMessage(customer, message, role) {
+export async function addNewMessage(customer, message, role, image_url) {
   const { chat_id, messages } = customer;
   try {
     const filter = { chat_id };
     const newMessage = {
       role,
       content: message,
+      image_url: image_url || "",
     };
 
     const updatedMessages = [...messages, newMessage];

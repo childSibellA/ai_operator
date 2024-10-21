@@ -86,26 +86,33 @@ export async function createTextChat(messages) {
   return assistant_message;
 }
 
-async function imageInputLLM() {
-  async function main() {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: "What's in this image?" },
-            {
-              type: "image_url",
-              image_url: {
-                url: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg",
-              },
+export async function imageInputLLM(apiKey, url) {
+  const openai = new OpenAI({
+    apiKey,
+  });
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "აღწერე სურათი, ტურის მდებარეობა, ფასი, დრო და რამდენ ადამიანზეა გათვლილი",
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url,
             },
-          ],
-        },
-      ],
-    });
-    console.log(response.choices[0]);
-  }
-  main();
+          },
+        ],
+      },
+    ],
+  });
+
+  console.log(response.choices[0].message, "response");
+
+  const image_descr = response.choices[0].message.content;
+  return image_descr;
 }
