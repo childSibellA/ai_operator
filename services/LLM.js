@@ -33,7 +33,7 @@ export async function createChatWithTools(
   const openai = new OpenAI({
     apiKey,
   });
-  let customer_info = `მომხმარებლის სახელი არის${full_name}`;
+  let customer_info = `მომხმარებლის სახელი არის${full_name}, რომელიც შეგიძლია იმ ენაზე დაწერო რა ენაზეც საუბარი შედგება (მაგ: Alex - ალექს)`;
   let instructions = {
     role: "system",
     content: [

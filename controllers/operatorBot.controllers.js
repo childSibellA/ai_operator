@@ -41,7 +41,7 @@ async function handleNewCustomer(company, newMessage, customer_info) {
 }
 
 async function handleExistingCustomer(customer, newMessage, company) {
-  const { chat_id, full_name, gender } = customer;
+  const { chat_id, full_name, gender, bot_active } = customer;
   const { page_access_token, system_instructions, apiKey } = company;
 
   const text = newMessage;
@@ -51,6 +51,9 @@ async function handleExistingCustomer(customer, newMessage, company) {
     const updatedCustomer = await addNewMessage(customer, text, role);
     const { messages } = updatedCustomer;
 
+    if (!bot_active) {
+      return;
+    }
     const simplifiedMessages = messages.map(({ role, content }) => ({
       role,
       content,
