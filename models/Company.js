@@ -24,6 +24,18 @@ const CompanySchema = mongoose.Schema(
       flag: { type: String, default: "ge" },
       number: { type: String, required: false, match: /^[0-9]{9}$/ }, // Pattern for 9-digit numbers
     },
+    system_instructions: {
+      role: { type: String, default: "" },
+      content: [
+        {
+          type: {
+            type: String,
+            required: false,
+          },
+          text: { type: String, required: false },
+        },
+      ],
+    },
     payment_methods: [
       {
         bank_name: { type: String, required: false },

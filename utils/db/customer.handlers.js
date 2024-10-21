@@ -10,22 +10,68 @@ export async function getCustomer(chat_id) {
   }
 }
 
-export async function createNewCustomer(newCustomer) {
+export async function addNewMessage(customer, message, role) {
+  const { chat_id, messages } = customer;
   try {
-    const { chat_id, threads_id, company_id } = newCustomer;
+    const filter = { chat_id };
+    const newMessage = {
+      role,
+      content: message,
+    };
 
-    // Check if either chat_id or threads_id already exists
+    const updatedMessages = [...messages, newMessage];
+    const updatedCustomer = await Customer.findOneAndUpdate(
+      filter,
+      { messages: updatedMessages },
+      { new: true, runValidators: true }
+    );
+
+    return updatedCustomer;
+  } catch (error) {
+    console.error("Error adding new message:", error);
+    return false;
+  }
+}
+
+export async function changeCustomerInfo(customer, phone_number, note) {
+  const { chat_id } = customer;
+  try {
+    const filter = { chat_id };
+    const updatedCustomer = await Customer.findOneAndUpdate(
+      filter,
+      {
+        note,
+        phone_number: {
+          code: "+995",
+          flag: "ge",
+          number: phone_number,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    return updatedCustomer;
+  } catch (error) {
+    console.error("Error updating customer:", error);
+    return false;
+  }
+}
+
+export async function createNewCustomer(chat_id, company_id) {
+  try {
+    // Check if either chat_id already exists
     const existingChat = await Customer.findOne({ chat_id });
-    const existingThread = await Customer.findOne({ threads_id });
 
-    console.log(existingChat, existingThread, "validation");
+    console.log(existingChat, "validation");
 
     // Proceed to create a new customer only if both are not found or are empty
     if (!existingChat && !existingThread) {
       const customer = new Customer({
         company_id,
         operator_id: "66e2381a9f82da4fd0a0b74a",
-        threads_id,
         chat_id,
       });
 

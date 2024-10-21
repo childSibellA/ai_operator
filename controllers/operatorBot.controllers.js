@@ -1,4 +1,4 @@
-import { chatGPT } from "../services/chatGPT.js";
+import { createChatWithTools } from "../services/LLM.js";
 import { getCompany } from "../utils/db/company.handlers.js";
 import {
   telegramMsgSender,
@@ -11,52 +11,101 @@ import {
 } from "../middlewares/facebookMsgSender.js";
 import {
   createNewCustomer,
+  changeCustomerInfo,
   getCustomer,
+  addNewMessage,
 } from "../utils/db/customer.handlers.js";
-
-// messageColector remains a string
-let messageColector = "";
 
 // Utility function to create a delay
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function chatPreparation(message, chat_id, company, userFBInfo) {
+async function handleNewCustomer(chat_id, company, newMessage) {
+  let company_id = company._id;
   try {
-    const { assistant_id, _id } = company;
+    const newCustomer = await createNewCustomer(chat_id, company_id);
 
-    let customer = await getCustomer(chat_id);
-
-    if (!customer) {
-      const result = await chatGPT(message, "no thread", assistant_id, _id);
-      const { threads_id, sms } = result;
-
-      const newCustomer = {
-        chat_id,
-        threads_id,
-        company_id: _id,
-      };
-
-      customer = await createNewCustomer(newCustomer);
-
-      if (!customer) {
-        throw new Error("Failed to create new customer.");
-      }
-
-      return sms;
-    } else {
-      const result = await chatGPT(
-        message,
-        customer.threads_id,
-        assistant_id,
-        _id
-      );
-      const { sms } = result;
-      console.log(sms);
-      return sms;
+    if (newCustomer) {
+      await handleExistingCustomer(newCustomer, newMessage, company);
     }
-  } catch (err) {
-    console.error("Error handling GPT response:", err);
-    // return "Sorry, something went wrong.";
+  } catch (error) {
+    console.error("Error creating new customer:", error);
+    return facebookMsgSender(
+      chat_id,
+      "Sorry, something went wrong while creating a new customer."
+    );
+  }
+}
+
+async function handleExistingCustomer(customer, newMessage, company) {
+  const { chat_id } = customer;
+  const { page_access_token, system_instructions, apiKey } = company;
+  console.log(system_instructions, "company");
+  const text = newMessage;
+  try {
+    let role = "user";
+
+    const updatedCustomer = await addNewMessage(customer, text, role);
+    const { messages } = updatedCustomer;
+
+    const simplifiedMessages = messages.map(({ role, content }) => ({
+      role,
+      content,
+    }));
+
+    const assistant_resp = await createChatWithTools(
+      simplifiedMessages,
+      system_instructions,
+      apiKey
+    );
+    const { assistant_message, phone_number } = assistant_resp;
+
+    console.log(assistant_resp, "arg");
+
+    if (assistant_message) {
+      role = "assistant";
+      let finalCustomer = await addNewMessage(
+        updatedCustomer,
+        assistant_message,
+        role
+      );
+
+      console.log(finalCustomer, "finalll");
+      let lastMessage =
+        finalCustomer.messages[finalCustomer.messages.length - 1].content;
+
+      // Send the response message
+      return facebookMsgSender(chat_id, lastMessage, page_access_token);
+    } else {
+      let updatedCustomerInfo = await changeCustomerInfo(
+        updatedCustomer,
+        phone_number
+      );
+
+      let tool_choice = "none";
+      let assistant_resp = await createChatWithTools(
+        simplifiedMessages,
+        system_instructions,
+        apiKey,
+        tool_choice
+      );
+
+      const { assistant_message } = assistant_resp;
+
+      role = "assistant";
+      let finalCustomer = await addNewMessage(
+        updatedCustomer,
+        assistant_message,
+        role
+      );
+
+      let lastMessage =
+        finalCustomer.messages[finalCustomer.messages.length - 1].content;
+
+      // Send the response message
+      return facebookMsgSender(chat_id, lastMessage, page_access_token);
+    }
+  } catch (error) {
+    console.error("Error handling existing customer:", error);
   }
 }
 
@@ -105,14 +154,11 @@ export async function handlerFacebook(req, res) {
       const chat_id = webhookEvent.sender.id;
       const recipient_id = webhookEvent.recipient.id;
       let company = await getCompany(recipient_id);
-
       if (company) {
-        const { page_access_token, bot_active } = company;
+        const { page_access_token, bot_active, _id } = company;
 
         if (!bot_active) {
           console.log(
-            company,
-            page_access_token,
             bot_active,
             "Bot is not active. Stopping further actions."
           );
@@ -132,26 +178,20 @@ export async function handlerFacebook(req, res) {
             await callTypingAPI(chat_id, "mark_seen", page_access_token);
             await callTypingAPI(chat_id, "typing_on", page_access_token);
 
-            // Prepare the assistant response
-            const assistantResponse = await chatPreparation(
-              newMessage,
-              chat_id,
-              company
-            );
+            const customer = await getCustomer(chat_id);
 
-            await delay(2000); // Delay of 2 seconds
-
-            if (assistantResponse && page_access_token) {
-              // Send the assistant's response back
-              await facebookMsgSender(
-                chat_id,
-                assistantResponse,
-                page_access_token
-              );
-
-              // // Stop typing action
-              await callTypingAPI(chat_id, "typing_off", page_access_token);
+            if (!customer) {
+              // Handle new customer
+              await handleNewCustomer(chat_id, company, newMessage);
+            } else {
+              // Handle existing customer
+              await handleExistingCustomer(customer, newMessage, company);
             }
+
+            // await delay(2000); // Delay of 2 seconds
+            //   // // Stop typing action
+            //   await callTypingAPI(chat_id, "typing_off", page_access_token);
+            // }
           } else {
             console.log("No new message content to process.");
           }

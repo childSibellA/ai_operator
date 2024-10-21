@@ -36,7 +36,7 @@ const CustomerSchema = new mongoose.Schema(
     national_ID_number: { type: String, required: false },
     connection_dates: [{ type: Date }], // Array of dates
     template_tour: { type: Boolean, default: false },
-    note: { type: String },
+    note: { type: String, default: "" },
     operator_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
