@@ -16,7 +16,7 @@ export function facebookMsgSender(senderPsid, messageText, page_access_token) {
   facebookAxiosPostMessage(requestBody, page_access_token);
 }
 
-export function getUserById(sender_psid, fields, access_token) {
+export function getCustomerFbInfo(sender_psid, fields, access_token) {
   console.log(sender_psid, "sender_psid");
   const params = {
     fields,

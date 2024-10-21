@@ -7,22 +7,26 @@ import {
 import {
   callTypingAPI,
   facebookMsgSender,
-  getUserById,
+  getCustomerFbInfo,
 } from "../middlewares/facebookMsgSender.js";
 import {
   createNewCustomer,
   changeCustomerInfo,
   getCustomer,
   addNewMessage,
+  createNewCustomerFromFb,
 } from "../utils/db/customer.handlers.js";
 
 // Utility function to create a delay
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function handleNewCustomer(chat_id, company, newMessage) {
+async function handleNewCustomer(company, newMessage, customer_info) {
   let company_id = company._id;
   try {
-    const newCustomer = await createNewCustomer(chat_id, company_id);
+    const newCustomer = await createNewCustomerFromFb(
+      company_id,
+      customer_info
+    );
 
     if (newCustomer) {
       await handleExistingCustomer(newCustomer, newMessage, company);
@@ -37,9 +41,9 @@ async function handleNewCustomer(chat_id, company, newMessage) {
 }
 
 async function handleExistingCustomer(customer, newMessage, company) {
-  const { chat_id } = customer;
+  const { chat_id, full_name, gender } = customer;
   const { page_access_token, system_instructions, apiKey } = company;
-  console.log(system_instructions, "company");
+
   const text = newMessage;
   try {
     let role = "user";
@@ -55,11 +59,12 @@ async function handleExistingCustomer(customer, newMessage, company) {
     const assistant_resp = await createChatWithTools(
       simplifiedMessages,
       system_instructions,
-      apiKey
+      apiKey,
+      full_name
     );
     const { assistant_message, phone_number } = assistant_resp;
 
-    console.log(assistant_resp, "arg");
+    // console.log(assistant_resp, "arg");
 
     if (assistant_message) {
       role = "assistant";
@@ -69,7 +74,6 @@ async function handleExistingCustomer(customer, newMessage, company) {
         role
       );
 
-      console.log(finalCustomer, "finalll");
       let lastMessage =
         finalCustomer.messages[finalCustomer.messages.length - 1].content;
 
@@ -86,6 +90,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
         simplifiedMessages,
         system_instructions,
         apiKey,
+        full_name,
         tool_choice
       );
 
@@ -143,7 +148,6 @@ export async function handlerTelegram(req, res) {
 export async function handlerFacebook(req, res) {
   res.status(200).send("EVENT_RECEIVED");
   console.log("body", req.body.object);
-  console.log("body", req.body.entry[0].messaging[0].message);
 
   try {
     const { body } = req;
@@ -182,16 +186,20 @@ export async function handlerFacebook(req, res) {
             await callTypingAPI(chat_id, "typing_on", page_access_token);
 
             if (!customer) {
+              let customerInfo = await getCustomerFbInfo(
+                chat_id,
+                fields,
+                page_access_token
+              );
+              console.log(customerInfo, "customer info");
               // Handle new customer
-              await handleNewCustomer(chat_id, company, newMessage);
+              await handleNewCustomer(company, newMessage, customerInfo);
             } else {
               // Handle existing customer
               await handleExistingCustomer(customer, newMessage, company);
             }
           }
           if (newImage) {
-            console.log(newImage[0].payload.url, "image");
-
             let image_url = newImage[0].payload.url;
             let role = "user"; // Declare role here
 
@@ -211,8 +219,6 @@ export async function handlerFacebook(req, res) {
             } catch (error) {
               console.error("Error processing image:", error);
             }
-
-            console.log(image_descr, "image");
           } else {
             console.log("No new message or image content to process.");
           }

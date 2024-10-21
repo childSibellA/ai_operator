@@ -30,14 +30,17 @@ const CustomerSchema = new mongoose.Schema(
     },
     WDYAHAU: {
       type: String,
-      enum: ["fb", "instagram", "other", ""], // Add other options as needed
+      // enum: ["fb", "instagram", "other", ""], // Add other options as needed
       required: false,
     },
     status: { type: String, default: "pending", required: false },
     national_ID_number: { type: String, required: false },
     connection_dates: [{ type: Date }], // Array of dates
-    template_tour: { type: Boolean, default: false },
+    template_tour: { type: String, default: "" },
     note: { type: String, default: "" },
+    profile_pic: { type: String, require: false },
+    locale: { type: String, require: false },
+    timezone: { type: String, require: false },
     operator_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

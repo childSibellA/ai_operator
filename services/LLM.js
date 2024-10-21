@@ -27,14 +27,25 @@ export async function createChatWithTools(
   messagesFromDb,
   system_instructions,
   apiKey,
+  full_name,
   tool_choice
 ) {
   const openai = new OpenAI({
     apiKey,
   });
+  let customer_info = `მომხმარებლის სახელი არის${full_name}`;
+  let instructions = {
+    role: "system",
+    content: [
+      {
+        type: "text",
+        text: `${system_instructions} ${customer_info}`,
+      },
+    ],
+  };
 
-  let messages = [system_instructions, ...messagesFromDb];
-  console.log(messages, "messsage");
+  let messages = [instructions, ...messagesFromDb];
+  // console.log(messages, "messsage");
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -55,7 +66,7 @@ export async function createChatWithTools(
     if (response.choices[0].message.tool_calls) {
       const toolCall = response.choices[0].message.tool_calls[0];
       const argument = JSON.parse(toolCall.function.arguments);
-      console.log(argument, "arguments");
+      // console.log(argument, "arguments");
       return {
         assistant_message: null,
         phone_number: argument.phone_number || null,
