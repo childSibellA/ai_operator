@@ -43,6 +43,7 @@ async function handleNewCustomer(company, newMessage, customer_info) {
 async function handleExistingCustomer(customer, newMessage, company) {
   const { chat_id, full_name, gender, bot_active } = customer;
   const { fb_page_access_token, system_instructions, openai_api_key } = company;
+  console.log(openai_api_key, "openai key");
 
   const text = newMessage;
   try {
