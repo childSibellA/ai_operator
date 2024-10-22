@@ -2,8 +2,6 @@ import axios from "axios";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-
 export function facebookAxiosPostMessage(requestBody, access_token, action) {
   axios
     .post("https://graph.facebook.com/v20.0/me/messages", requestBody, {
