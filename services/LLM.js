@@ -26,12 +26,12 @@ const tools = [
 export async function createChatWithTools(
   messagesFromDb,
   system_instructions,
-  apiKey,
+  openai_api_key,
   full_name,
   tool_choice
 ) {
   const openai = new OpenAI({
-    apiKey,
+    openai_api_key,
   });
   let customer_info = `მომხმარებლის სახელი არის${full_name}, რომელიც შეგიძლია იმ ენაზე დაწერო რა ენაზეც საუბარი შედგება (მაგ: Alex - ალექს)`;
   let instructions = {
@@ -97,9 +97,9 @@ export async function createTextChat(messages) {
   return assistant_message;
 }
 
-export async function imageInputLLM(apiKey, url) {
+export async function imageInputLLM(openai_api_key, url) {
   const openai = new OpenAI({
-    apiKey,
+    openai_api_key,
   });
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
