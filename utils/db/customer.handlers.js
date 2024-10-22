@@ -137,6 +137,37 @@ export async function createNewCustomerFromFb(company_id, customer_info) {
   }
 }
 
+export async function createNewCustomerFromInstagram(company_id, chat_id) {
+  try {
+    // Check if either chat_id already exists
+    const existingChat = await Customer.findOne({ chat_id });
+
+    console.log(existingChat, "validation");
+
+    // Proceed to create a new customer only if both are not found or are empty
+    if (!existingChat) {
+      const customer = new Customer({
+        company_id,
+        WDYAHAU: "instagram",
+        operator_id: "66e2381a9f82da4fd0a0b74a",
+        chat_id: chat_id,
+      });
+
+      await customer.save();
+
+      return customer;
+    } else {
+      console.log(
+        "Customer with the same chat_id or threads_id already exists."
+      );
+      return null; // Return null if customer already exists
+    }
+  } catch (error) {
+    console.error("Error creating new customer:", error);
+    return false;
+  }
+}
+
 export async function editCustomer(threads_id, newDetails, company_id) {
   // Combine outputs from newDetails into a single object
   const combinedOutputs = {};

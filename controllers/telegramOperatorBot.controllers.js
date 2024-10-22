@@ -1,5 +1,5 @@
 import { createChatWithTools, imageInputLLM } from "../services/LLM.js";
-import { getCompany } from "../utils/db/company.handlers.js";
+import { getCompanyByInstagram } from "../utils/db/company.handlers.js";
 import {
   telegramMsgSender,
   sendToAdmin,
@@ -15,17 +15,19 @@ import {
   getCustomer,
   addNewMessage,
   createNewCustomerFromFb,
+  createNewCustomerFromInstagram,
 } from "../utils/db/customer.handlers.js";
+import { instagramMsgSender } from "../middlewares/instagramMsgSender.js";
 
 // Utility function to create a delay
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function handleNewCustomer(company, newMessage, customer_info) {
+async function handleNewCustomer(company, newMessage, chat_id) {
   let company_id = company._id;
   try {
-    const newCustomer = await createNewCustomerFromFb(
+    const newCustomer = await createNewCustomerFromInstagram(
       company_id,
-      customer_info
+      chat_id
     );
 
     if (newCustomer) {
@@ -33,16 +35,12 @@ async function handleNewCustomer(company, newMessage, customer_info) {
     }
   } catch (error) {
     console.error("Error creating new customer:", error);
-    return facebookMsgSender(
-      chat_id,
-      "Sorry, something went wrong while creating a new customer."
-    );
   }
 }
 
 async function handleExistingCustomer(customer, newMessage, company) {
   const { chat_id, full_name, gender, bot_active } = customer;
-  const { page_access_token, system_instructions, apiKey } = company;
+  const { insta_page_access_token, system_instructions, apiKey } = company;
 
   const text = newMessage;
   try {
@@ -81,7 +79,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
         finalCustomer.messages[finalCustomer.messages.length - 1].content;
 
       // Send the response message
-      return facebookMsgSender(chat_id, lastMessage, page_access_token);
+      return instagramMsgSender(chat_id, lastMessage, insta_page_access_token);
     } else {
       let updatedCustomerInfo = await changeCustomerInfo(
         updatedCustomer,
@@ -110,7 +108,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
         finalCustomer.messages[finalCustomer.messages.length - 1].content;
 
       // Send the response message
-      return facebookMsgSender(chat_id, lastMessage, page_access_token);
+      return instagramMsgSender(chat_id, lastMessage, insta_page_access_token);
     }
   } catch (error) {
     console.error("Error handling existing customer:", error);
@@ -148,23 +146,27 @@ export async function handlerTelegram(req, res) {
   }
 }
 
-export async function handlerFacebook(req, res) {
+export async function handlerInstagram(req, res) {
   res.status(200).send("EVENT_RECEIVED");
-  console.log("body", req.body.object);
+  console.log("body", req.body);
 
   try {
     const { body } = req;
 
-    if (body.object === "page" && body.entry && body.entry[0].messaging) {
+    if (body.object === "instagram" && body.entry && body.entry[0].messaging) {
       const webhookEvent = body.entry[0].messaging[0];
       console.log(webhookEvent, "webhook");
 
       const chat_id = webhookEvent.sender.id;
       const recipient_id = webhookEvent.recipient.id;
-      let company = await getCompany(recipient_id);
-      if (company) {
-        const { page_access_token, bot_active, apiKey } = company;
+      let company = await getCompanyByInstagram(recipient_id);
+      const { insta_page_access_token, bot_active, apiKey } = company;
 
+      const newMessage = webhookEvent.message?.text || "";
+      const newImage = webhookEvent.message?.attachments || "";
+      console.log(company, "insta");
+      // instagramMsgSender(chat_id, newMessage, insta_page_access_token);
+      if (company) {
         if (!bot_active) {
           console.log(
             bot_active,
@@ -178,53 +180,50 @@ export async function handlerFacebook(req, res) {
         const fields =
           "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
 
-        const newMessage = webhookEvent.message?.text || "";
-        const newImage = webhookEvent.message?.attachments || "";
-
         try {
           const customer = await getCustomer(chat_id);
           if (newMessage) {
             // Mark message as seen and typing action
-            await callTypingAPI(chat_id, "mark_seen", page_access_token);
-            await callTypingAPI(chat_id, "typing_on", page_access_token);
+            // await callTypingAPI(chat_id, "mark_seen", insta_page_access_token);
+            // await callTypingAPI(chat_id, "typing_on", insta_page_access_token);
 
             if (!customer) {
-              let customerInfo = await getCustomerFbInfo(
-                chat_id,
-                fields,
-                page_access_token
-              );
-              console.log(customerInfo, "customer info");
+              // let customerInfo = await getCustomerFbInfo(
+              //   chat_id,
+              //   fields,
+              //   insta_page_access_token
+              // );
+              // console.log(customerInfo, "customer info");
               // Handle new customer
-              await handleNewCustomer(company, newMessage, customerInfo);
+              await handleNewCustomer(company, newMessage, chat_id);
             } else {
               // Handle existing customer
               await handleExistingCustomer(customer, newMessage, company);
             }
           }
-          if (newImage) {
-            let image_url = newImage[0].payload.url;
-            let role = "user"; // Declare role here
+          // if (newImage) {
+          //   let image_url = newImage[0].payload.url;
+          //   let role = "user"; // Declare role here
 
-            try {
-              // Call imageInputLLM and await the result
-              const image_descr = await imageInputLLM(apiKey, image_url);
-              let full_descr = `მომხმარებელმა სურათი გამოგვიგზავნა რომლის აღწერაა:${image_descr}`;
-              // Update the customer with the new image description
-              const updatedCustomer = await addNewMessage(
-                customer,
-                full_descr,
-                role,
-                image_url
-              );
+          //   try {
+          //     // Call imageInputLLM and await the result
+          //     const image_descr = await imageInputLLM(apiKey, image_url);
+          //     let full_descr = `მომხმარებელმა სურათი გამოგვიგზავნა რომლის აღწერაა:${image_descr}`;
+          //     // Update the customer with the new image description
+          //     const updatedCustomer = await addNewMessage(
+          //       customer,
+          //       full_descr,
+          //       role,
+          //       image_url
+          //     );
 
-              console.log(updatedCustomer, "updated customer");
-            } catch (error) {
-              console.error("Error processing image:", error);
-            }
-          } else {
-            console.log("No new message or image content to process.");
-          }
+          //     console.log(updatedCustomer, "updated customer");
+          //   } catch (error) {
+          //     console.error("Error processing image:", error);
+          //   }
+          // } else {
+          //   console.log("No new message or image content to process.");
+          // }
         } catch (err) {
           console.error("Error fetching user info or sending message:", err);
         }

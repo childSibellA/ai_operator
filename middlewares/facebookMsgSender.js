@@ -3,7 +3,11 @@ import {
   facebookAxiosPostMessage,
 } from "../apis/facebookAxios.js";
 
-export function facebookMsgSender(senderPsid, messageText, page_access_token) {
+export function facebookMsgSender(
+  senderPsid,
+  messageText,
+  fb_page_access_token
+) {
   const requestBody = {
     recipient: {
       id: senderPsid,
@@ -13,7 +17,7 @@ export function facebookMsgSender(senderPsid, messageText, page_access_token) {
     },
   };
 
-  facebookAxiosPostMessage(requestBody, page_access_token);
+  facebookAxiosPostMessage(requestBody, fb_page_access_token);
 }
 
 export function getCustomerFbInfo(sender_psid, fields, access_token) {
@@ -27,12 +31,12 @@ export function getCustomerFbInfo(sender_psid, fields, access_token) {
   return result;
 }
 
-export function callTypingAPI(sender_psid, action, page_access_token) {
+export function callTypingAPI(sender_psid, action, fb_page_access_token) {
   console.log(action, "action");
   const requestBody = {
     recipient: { id: sender_psid },
     sender_action: action, // Use 'typing_on', 'typing_off', or 'mark_seen'
   };
 
-  facebookAxiosPostMessage(requestBody, page_access_token, action);
+  facebookAxiosPostMessage(requestBody, fb_page_access_token, action);
 }

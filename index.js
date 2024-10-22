@@ -30,7 +30,7 @@ app.use("/chat", operatorRoute);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
+// Fb Webhook Verification
 app.get("/chat/facebook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -43,5 +43,55 @@ app.get("/chat/facebook", (req, res) => {
     } else {
       res.sendStatus(403);
     }
+  }
+});
+
+// Instagram Webhook Verification
+app.get("/chat/instagram", (req, res) => {
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  // Verify the webhook token for Instagram
+  if (mode && token) {
+    if (mode === "subscribe" && token === VERIFY_TOKEN) {
+      console.log("INSTAGRAM_WEBHOOK_VERIFIED");
+      res.status(200).send(challenge);
+    } else {
+      res.sendStatus(403);
+    }
+  }
+});
+
+// Instagram Webhook Event Handling
+app.post("/chat/inst", (req, res) => {
+  try {
+    const body = req.body;
+    console.log(body, "body");
+
+    if (body.object === "instagram") {
+      // Process Instagram webhook events (e.g., messages, mentions)
+      console.log("Received Instagram event:", JSON.stringify(body, null, 2));
+
+      // Loop through each entry and handle messages/mentions
+      body.entry.forEach((entry) => {
+        entry.messaging.forEach((event) => {
+          if (event.message) {
+            console.log("Received Instagram Message: ", event.message);
+            // Handle message events here
+          } else if (event.mention) {
+            console.log("Received Instagram Mention: ", event.mention);
+            // Handle mention events here
+          }
+        });
+      });
+
+      res.status(200).send("EVENT_RECEIVED");
+    } else {
+      res.sendStatus(404);
+    }
+  } catch (error) {
+    console.error("Error handling Instagram webhook event:", error);
+    res.sendStatus(500);
   }
 });
