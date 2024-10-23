@@ -43,7 +43,6 @@ async function handleNewCustomer(company, newMessage, customer_info) {
 async function handleExistingCustomer(customer, newMessage, company) {
   const { chat_id, full_name, gender, bot_active } = customer;
   const { fb_page_access_token, system_instructions, openai_api_key } = company;
-  console.log(openai_api_key, "openai key");
 
   const text = newMessage;
   try {
@@ -185,9 +184,9 @@ export async function handlerFacebook(req, res) {
         try {
           const customer = await getCustomer(chat_id);
           if (newMessage) {
-            // Mark message as seen and typing action
-            await callTypingAPI(chat_id, "mark_seen", fb_page_access_token);
-            await callTypingAPI(chat_id, "typing_on", fb_page_access_token);
+            // // Mark message as seen and typing action
+            // await callTypingAPI(chat_id, "mark_seen", fb_page_access_token);
+            // await callTypingAPI(chat_id, "typing_on", fb_page_access_token);
 
             if (!customer) {
               let customerInfo = await getCustomerFbInfo(
