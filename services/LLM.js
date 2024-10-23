@@ -23,6 +23,31 @@ const tools = [
   {
     type: "function",
     function: {
+      name: "get_customer_info",
+      description:
+        "get customer name and phone number if is not this information in system",
+      parameters: {
+        type: "object",
+        properties: {
+          full_name: {
+            type: "string",
+            description: "The name of the customer",
+          },
+          phone_number: {
+            type: "string",
+            description:
+              "The customer's phone number without the country code (e.g., 4567890).",
+          },
+        },
+        additionalProperties: false,
+        required: ["full_name", "phone_number"],
+      },
+      strict: true,
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "get_customer_phone_number",
       description: "For the customer, registration ask phone number",
       parameters: {
@@ -47,12 +72,13 @@ export async function createChatWithTools(
   system_instructions,
   openai_api_key,
   full_name,
+  phone_number,
   tool_choice
 ) {
   const openai = new OpenAI({
     apiKey: openai_api_key,
   });
-  let customer_info = `მომხმარებლის სახელი არის${full_name}, რომელიც შეგიძლია იმ ენაზე დაწერო რა ენაზეც საუბარი შედგება (მაგ: Alex - ალექს)`;
+  let customer_info = `მომხმარებლის ტელეფონის ნომერი${phone_number.number}, მომხმარებლის სახელი არის${full_name}, სახელი შეგიძლია იმ ენაზე დაწერო რა ენაზეც საუბარი შედგება (მაგ: Alex - ალექს)`;
   let instructions = {
     role: "system",
     content: [

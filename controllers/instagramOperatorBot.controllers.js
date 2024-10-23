@@ -62,7 +62,8 @@ async function handleExistingCustomer(customer, newMessage, company) {
       simplifiedMessages,
       system_instructions,
       openai_api_key,
-      full_name
+      full_name,
+      phone_number
     );
     const { assistant_message, phone_number } = assistant_resp;
 
@@ -93,6 +94,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
         system_instructions,
         openai_api_key,
         full_name,
+        phone_number,
         tool_choice
       );
 

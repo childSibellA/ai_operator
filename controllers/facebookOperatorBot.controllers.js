@@ -41,7 +41,7 @@ async function handleNewCustomer(company, newMessage, customer_info) {
 }
 
 async function handleExistingCustomer(customer, newMessage, company) {
-  const { chat_id, full_name, gender, bot_active } = customer;
+  const { chat_id, full_name, gender, bot_active, phone_number } = customer;
   const { fb_page_access_token, system_instructions, openai_api_key } = company;
 
   const text = newMessage;
@@ -64,9 +64,10 @@ async function handleExistingCustomer(customer, newMessage, company) {
       system_instructions,
       openai_api_key,
       full_name,
+      phone_number,
       tool_choice
     );
-    const { assistant_message, phone_number, name_from_llm } = assistant_resp;
+    const { assistant_message, phone_from_llm, name_from_llm } = assistant_resp;
 
     // console.log(assistant_resp, "arg");
 
@@ -86,7 +87,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
     } else {
       let updatedCustomerInfo = await changeCustomerInfo(
         updatedCustomer,
-        phone_number,
+        phone_from_llm,
         name_from_llm
       );
 
@@ -96,6 +97,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
         system_instructions,
         openai_api_key,
         full_name,
+        phone_number,
         tool_choice
       );
 
