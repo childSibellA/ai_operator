@@ -65,9 +65,10 @@ async function handleExistingCustomer(customer, newMessage, company) {
       openai_api_key,
       full_name
     );
-    const { assistant_message, phone_number } = assistant_resp;
+    const { assistant_message, phone_number, full_name_from_llm } =
+      assistant_resp;
 
-    // console.log(assistant_resp, "arg");
+    console.log(assistant_resp, "arg");
 
     if (assistant_message) {
       role = "assistant";
@@ -85,7 +86,8 @@ async function handleExistingCustomer(customer, newMessage, company) {
     } else {
       let updatedCustomerInfo = await changeCustomerInfo(
         updatedCustomer,
-        phone_number
+        phone_number,
+        full_name_from_llm
       );
 
       let tool_choice = "none";
@@ -150,7 +152,7 @@ export async function handlerTelegram(req, res) {
 
 export async function handlerFacebook(req, res) {
   res.status(200).send("EVENT_RECEIVED");
-  console.log("body", req.body.object);
+  console.log(req.body, "body");
 
   try {
     const { body } = req;
@@ -162,6 +164,7 @@ export async function handlerFacebook(req, res) {
       const chat_id = webhookEvent.sender.id;
       const recipient_id = webhookEvent.recipient.id;
       let company = await getCompanyByFb(recipient_id);
+
       if (company) {
         const { fb_page_access_token, bot_active, openai_api_key } = company;
 
@@ -173,10 +176,7 @@ export async function handlerFacebook(req, res) {
           return; // Exit the function early to prevent further processing
         }
 
-        console.log(bot_active, "bot status");
-
-        const fields =
-          "id,name,first_name,last_name,profile_pic,locale,timezone,gender,birthday";
+        const fields = "id,first_name";
 
         const newMessage = webhookEvent.message?.text || "";
         const newImage = webhookEvent.message?.attachments || "";
@@ -184,9 +184,9 @@ export async function handlerFacebook(req, res) {
         try {
           const customer = await getCustomer(chat_id);
           if (newMessage) {
-            // // Mark message as seen and typing action
-            // await callTypingAPI(chat_id, "mark_seen", fb_page_access_token);
-            // await callTypingAPI(chat_id, "typing_on", fb_page_access_token);
+            // Mark message as seen and typing action
+            await callTypingAPI(chat_id, "mark_seen", fb_page_access_token);
+            await callTypingAPI(chat_id, "typing_on", fb_page_access_token);
 
             if (!customer) {
               let customerInfo = await getCustomerFbInfo(
@@ -196,13 +196,16 @@ export async function handlerFacebook(req, res) {
               );
               console.log(customerInfo, "customer info");
               // Handle new customer
-              await handleNewCustomer(company, newMessage, customerInfo);
+              await handleNewCustomer(
+                company,
+                newMessage,
+                customerInfo || { id: chat_id }
+              );
             } else {
               // Handle existing customer
               await handleExistingCustomer(customer, newMessage, company);
             }
-          }
-          if (newImage) {
+          } else if (newImage) {
             let image_url = newImage[0].payload.url;
             let role = "user"; // Declare role here
 

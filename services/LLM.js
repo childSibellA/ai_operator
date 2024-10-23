@@ -21,6 +21,26 @@ const tools = [
       strict: true,
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "get_customer_full_name",
+      description:
+        "Ask customer's name for registration, if you do not know it",
+      parameters: {
+        type: "object",
+        properties: {
+          full_name: {
+            type: "string",
+            description: "The name of the customer.",
+          },
+        },
+        additionalProperties: false,
+        required: ["full_name"],
+      },
+      strict: true,
+    },
+  },
 ];
 
 export async function createChatWithTools(
@@ -70,10 +90,11 @@ export async function createChatWithTools(
       return {
         assistant_message: null,
         phone_number: argument.phone_number || null,
+        full_name_from_llm: argument.full_name || null,
       };
     } else {
       const assistant_message = response.choices[0].message.content || "";
-      return { assistant_message, phone_number: null };
+      return { assistant_message, phone_number: null, full_name: null };
     }
   } catch (error) {
     console.log("An error occurred:", error.message);

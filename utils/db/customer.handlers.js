@@ -34,14 +34,14 @@ export async function addNewMessage(customer, message, role, image_url) {
   }
 }
 
-export async function changeCustomerInfo(customer, phone_number, note) {
+export async function changeCustomerInfo(customer, phone_number, full_name) {
   const { chat_id } = customer;
   try {
     const filter = { chat_id };
     const updatedCustomer = await Customer.findOneAndUpdate(
       filter,
       {
-        note,
+        full_name,
         phone_number: {
           code: "+995",
           flag: "ge",
@@ -65,8 +65,6 @@ export async function createNewCustomer(chat_id, company_id) {
   try {
     // Check if either chat_id already exists
     const existingChat = await Customer.findOne({ chat_id });
-
-    console.log(existingChat, "validation");
 
     // Proceed to create a new customer only if both are not found or are empty
     if (!existingChat && !existingThread) {
@@ -112,11 +110,11 @@ export async function createNewCustomerFromFb(company_id, customer_info) {
     if (!existingChat) {
       const customer = new Customer({
         company_id,
-        full_name: name || first_name + " " + last_name,
+        full_name: name || "",
         profile_pic: profile_pic || "",
         gender: gender || "",
         locale: locale || "",
-        timezone: timezone.toString() || "",
+        timezone: timezone?.toString() || "",
         WDYAHAU: "fb",
         operator_id: "66e2381a9f82da4fd0a0b74a",
         chat_id: id,
@@ -126,9 +124,7 @@ export async function createNewCustomerFromFb(company_id, customer_info) {
 
       return customer;
     } else {
-      console.log(
-        "Customer with the same chat_id or threads_id already exists."
-      );
+      console.log("Customer with the same chat_id  already exists.");
       return null; // Return null if customer already exists
     }
   } catch (error) {
