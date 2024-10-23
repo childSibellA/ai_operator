@@ -4,6 +4,25 @@ const tools = [
   {
     type: "function",
     function: {
+      name: "get_customer_full_name",
+      description: "Ask customer's name if do not know it",
+      parameters: {
+        type: "object",
+        properties: {
+          full_name: {
+            type: "string",
+            description: "The name of the customer",
+          },
+        },
+        additionalProperties: false,
+        required: ["full_name"],
+      },
+      strict: true,
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "get_customer_phone_number",
       description: "For the customer, registration ask phone number",
       parameters: {
@@ -51,7 +70,7 @@ export async function createChatWithTools(
   tool_choice
 ) {
   const openai = new OpenAI({
-    openai_api_key,
+    apiKey: openai_api_key,
   });
   let customer_info = `მომხმარებლის სახელი არის${full_name}, რომელიც შეგიძლია იმ ენაზე დაწერო რა ენაზეც საუბარი შედგება (მაგ: Alex - ალექს)`;
   let instructions = {
@@ -59,25 +78,25 @@ export async function createChatWithTools(
     content: [
       {
         type: "text",
-        text: `${system_instructions} ${customer_info}`,
+        text: `${system_instructions} ${full_name ? customer_info : ""}`,
       },
     ],
   };
 
   let messages = [instructions, ...messagesFromDb];
-  // console.log(messages, "messsage");
+  // console.log(messages, "messsage"); {"type": "function", "function": {"name": "my_function"}}
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: messages,
-      temperature: 1,
-      max_tokens: 2048,
+      temperature: 0.28,
+      max_completion_tokens: 204,
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
       tools: tools,
       tool_choice: tool_choice || "auto",
-      parallel_tool_calls: false,
+      parallel_tool_calls: true,
       response_format: {
         type: "text",
       },
@@ -86,11 +105,11 @@ export async function createChatWithTools(
     if (response.choices[0].message.tool_calls) {
       const toolCall = response.choices[0].message.tool_calls[0];
       const argument = JSON.parse(toolCall.function.arguments);
-      // console.log(argument, "arguments");
+      console.log(argument, "arguments");
       return {
         assistant_message: null,
         phone_number: argument.phone_number || null,
-        full_name_from_llm: argument.full_name || null,
+        name_from_llm: argument.full_name || null,
       };
     } else {
       const assistant_message = response.choices[0].message.content || "";
@@ -101,26 +120,29 @@ export async function createChatWithTools(
   }
 }
 
-export async function createTextChat(messages) {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [messages],
-    temperature: 1,
-    max_tokens: 2048,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-    response_format: {
-      type: "text",
-    },
-  });
-  const assistant_message = response.choices[0].message.content;
-  return assistant_message;
-}
+// export async function createTextChat(messages) {
+//   const openai = new OpenAI({
+//     apiKey: openai_api_key,
+//   });
+//   const response = await openai.chat.completions.create({
+//     model: "gpt-4o",
+//     messages: [messages],
+//     temperature: 1,
+//     max_tokens: 2048,
+//     top_p: 1,
+//     frequency_penalty: 0,
+//     presence_penalty: 0,
+//     response_format: {
+//       type: "text",
+//     },
+//   });
+//   const assistant_message = response.choices[0].message.content;
+//   return assistant_message;
+// }
 
 export async function imageInputLLM(openai_api_key, url) {
   const openai = new OpenAI({
-    openai_api_key,
+    apiKey: openai_api_key,
   });
   const response = await openai.chat.completions.create({
     model: "gpt-4o",

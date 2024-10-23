@@ -58,15 +58,15 @@ async function handleExistingCustomer(customer, newMessage, company) {
       role,
       content,
     }));
-
+    let tool_choice = "auto";
     const assistant_resp = await createChatWithTools(
       simplifiedMessages,
       system_instructions,
       openai_api_key,
-      full_name
+      full_name,
+      tool_choice
     );
-    const { assistant_message, phone_number, full_name_from_llm } =
-      assistant_resp;
+    const { assistant_message, phone_number, name_from_llm } = assistant_resp;
 
     console.log(assistant_resp, "arg");
 
@@ -87,7 +87,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
       let updatedCustomerInfo = await changeCustomerInfo(
         updatedCustomer,
         phone_number,
-        full_name_from_llm
+        name_from_llm
       );
 
       let tool_choice = "none";

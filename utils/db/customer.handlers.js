@@ -38,19 +38,29 @@ export async function changeCustomerInfo(customer, phone_number, full_name) {
   const { chat_id } = customer;
   try {
     const filter = { chat_id };
+    const updateFields = {};
+
+    // Only update full_name if it's provided
+    if (full_name) {
+      updateFields.full_name = full_name;
+    }
+
+    // Only update phone_number if it's provided
+    if (phone_number) {
+      updateFields.phone_number = {
+        code: "+995",
+        flag: "ge",
+        number: phone_number,
+      };
+    }
+
+    // Perform the update using findOneAndUpdate with conditions
     const updatedCustomer = await Customer.findOneAndUpdate(
       filter,
+      { $set: updateFields }, // Using $set to avoid overwriting entire fields
       {
-        full_name,
-        phone_number: {
-          code: "+995",
-          flag: "ge",
-          number: phone_number,
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
+        new: true, // Return the updated document
+        runValidators: true, // Ensure Mongoose validation is applied
       }
     );
 
@@ -103,8 +113,6 @@ export async function createNewCustomerFromFb(company_id, customer_info) {
   try {
     // Check if either chat_id already exists
     const existingChat = await Customer.findOne({ id });
-
-    console.log(existingChat, "validation");
 
     // Proceed to create a new customer only if both are not found or are empty
     if (!existingChat) {
