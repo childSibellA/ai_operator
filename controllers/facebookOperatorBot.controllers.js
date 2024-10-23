@@ -42,7 +42,7 @@ async function handleNewCustomer(company, newMessage, customer_info) {
 
 async function handleExistingCustomer(customer, newMessage, company) {
   const { chat_id, full_name, gender, bot_active } = customer;
-  const { fb_page_access_token, system_instructions, apiKey } = company;
+  const { fb_page_access_token, system_instructions, openai_api_key } = company;
 
   const text = newMessage;
   try {
@@ -58,14 +58,15 @@ async function handleExistingCustomer(customer, newMessage, company) {
       role,
       content,
     }));
-
+    let tool_choice = "auto";
     const assistant_resp = await createChatWithTools(
       simplifiedMessages,
       system_instructions,
-      apiKey,
-      full_name
+      openai_api_key,
+      full_name,
+      tool_choice
     );
-    const { assistant_message, phone_number } = assistant_resp;
+    const { assistant_message, phone_number, name_from_llm } = assistant_resp;
 
     // console.log(assistant_resp, "arg");
 
@@ -85,14 +86,15 @@ async function handleExistingCustomer(customer, newMessage, company) {
     } else {
       let updatedCustomerInfo = await changeCustomerInfo(
         updatedCustomer,
-        phone_number
+        phone_number,
+        name_from_llm
       );
 
       let tool_choice = "none";
       let assistant_resp = await createChatWithTools(
         simplifiedMessages,
         system_instructions,
-        apiKey,
+        openai_api_key,
         full_name,
         tool_choice
       );
@@ -163,7 +165,7 @@ export async function handlerFacebook(req, res) {
       const recipient_id = webhookEvent.recipient.id;
       let company = await getCompanyByFb(recipient_id);
       if (company) {
-        const { fb_page_access_token, bot_active, apiKey } = company;
+        const { fb_page_access_token, bot_active, openai_api_key } = company;
 
         if (!bot_active) {
           console.log(
@@ -196,7 +198,11 @@ export async function handlerFacebook(req, res) {
               );
               console.log(customerInfo, "customer info");
               // Handle new customer
-              await handleNewCustomer(company, newMessage, customerInfo);
+              await handleNewCustomer(
+                company,
+                newMessage,
+                customerInfo || { id: chat_id }
+              );
             } else {
               // Handle existing customer
               await handleExistingCustomer(customer, newMessage, company);
@@ -208,7 +214,10 @@ export async function handlerFacebook(req, res) {
 
             try {
               // Call imageInputLLM and await the result
-              const image_descr = await imageInputLLM(apiKey, image_url);
+              const image_descr = await imageInputLLM(
+                openai_api_key,
+                image_url
+              );
               let full_descr = `მომხმარებელმა სურათი გამოგვიგზავნა რომლის აღწერაა:${image_descr}`;
               // Update the customer with the new image description
               const updatedCustomer = await addNewMessage(

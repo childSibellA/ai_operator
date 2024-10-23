@@ -40,7 +40,8 @@ async function handleNewCustomer(company, newMessage, chat_id) {
 
 async function handleExistingCustomer(customer, newMessage, company) {
   const { chat_id, full_name, gender, bot_active } = customer;
-  const { insta_page_access_token, system_instructions, apiKey } = company;
+  const { insta_page_access_token, system_instructions, openai_api_key } =
+    company;
 
   const text = newMessage;
   try {
@@ -60,7 +61,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
     const assistant_resp = await createChatWithTools(
       simplifiedMessages,
       system_instructions,
-      apiKey,
+      openai_api_key,
       full_name
     );
     const { assistant_message, phone_number } = assistant_resp;
@@ -90,7 +91,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
       let assistant_resp = await createChatWithTools(
         simplifiedMessages,
         system_instructions,
-        apiKey,
+        openai_api_key,
         full_name,
         tool_choice
       );
@@ -160,7 +161,7 @@ export async function handlerInstagram(req, res) {
       const chat_id = webhookEvent.sender.id;
       const recipient_id = webhookEvent.recipient.id;
       let company = await getCompanyByInstagram(recipient_id);
-      const { insta_page_access_token, bot_active, apiKey } = company;
+      const { insta_page_access_token, bot_active, openai_api_key } = company;
 
       const newMessage = webhookEvent.message?.text || "";
       const newImage = webhookEvent.message?.attachments || "";
@@ -207,7 +208,7 @@ export async function handlerInstagram(req, res) {
 
           //   try {
           //     // Call imageInputLLM and await the result
-          //     const image_descr = await imageInputLLM(apiKey, image_url);
+          //     const image_descr = await imageInputLLM(openai_api_key, image_url);
           //     let full_descr = `მომხმარებელმა სურათი გამოგვიგზავნა რომლის აღწერაა:${image_descr}`;
           //     // Update the customer with the new image description
           //     const updatedCustomer = await addNewMessage(
