@@ -36,6 +36,7 @@ export async function addNewMessage(customer, message, role, image_url) {
 
 export async function changeCustomerInfo(customer, phone_number, full_name) {
   const { chat_id } = customer;
+  console.log(phone_number, full_name, "finale");
   try {
     const filter = { chat_id };
     const updateFields = {};

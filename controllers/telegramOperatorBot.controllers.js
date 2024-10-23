@@ -14,7 +14,6 @@ import {
   changeCustomerInfo,
   getCustomer,
   addNewMessage,
-  createNewCustomerFromFb,
   createNewCustomerFromInstagram,
 } from "../utils/db/customer.handlers.js";
 import { instagramMsgSender } from "../middlewares/instagramMsgSender.js";
