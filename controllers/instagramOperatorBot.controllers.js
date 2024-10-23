@@ -14,7 +14,6 @@ import {
   changeCustomerInfo,
   getCustomer,
   addNewMessage,
-  createNewCustomerFromFb,
   createNewCustomerFromInstagram,
 } from "../utils/db/customer.handlers.js";
 import { instagramMsgSender } from "../middlewares/instagramMsgSender.js";
@@ -39,7 +38,7 @@ async function handleNewCustomer(company, newMessage, chat_id) {
 }
 
 async function handleExistingCustomer(customer, newMessage, company) {
-  const { chat_id, full_name, gender, bot_active } = customer;
+  const { chat_id, full_name, gender, bot_active, phone_number } = customer;
   const { insta_page_access_token, system_instructions, openai_api_key } =
     company;
 
@@ -65,9 +64,9 @@ async function handleExistingCustomer(customer, newMessage, company) {
       full_name,
       phone_number
     );
-    const { assistant_message, phone_number } = assistant_resp;
+    const { assistant_message, phone_from_llm, name_from_llm } = assistant_resp;
 
-    // console.log(assistant_resp, "arg");
+    console.log(assistant_resp, "arg");
 
     if (assistant_message) {
       role = "assistant";
@@ -85,7 +84,8 @@ async function handleExistingCustomer(customer, newMessage, company) {
     } else {
       let updatedCustomerInfo = await changeCustomerInfo(
         updatedCustomer,
-        phone_number
+        phone_from_llm,
+        name_from_llm
       );
 
       let tool_choice = "none";
@@ -231,7 +231,7 @@ export async function handlerInstagram(req, res) {
           console.error("Error fetching user info or sending message:", err);
         }
       } else {
-        console.log(`New user ID is ${recipient_id}`);
+        console.log(`no company New user ID is ${recipient_id}`);
       }
     } else {
       res.status(404).send("Event not from a page subscription");

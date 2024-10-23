@@ -114,7 +114,7 @@ export async function createChatWithTools(
       console.log(argument, "arguments");
       return {
         assistant_message: null,
-        phone_number: argument.phone_number || null,
+        phone_from_llm: argument.phone_number || null,
         name_from_llm: argument.full_name || null,
       };
     } else {

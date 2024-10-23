@@ -69,7 +69,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
     );
     const { assistant_message, phone_from_llm, name_from_llm } = assistant_resp;
 
-    // console.log(assistant_resp, "arg");
+    console.log(assistant_resp, "arg");
 
     if (assistant_message) {
       role = "assistant";

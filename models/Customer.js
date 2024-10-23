@@ -5,6 +5,7 @@ const CustomerSchema = new mongoose.Schema(
     chat_id: {
       type: String,
       required: false,
+      unique: true,
     },
     threads_id: {
       type: String,
