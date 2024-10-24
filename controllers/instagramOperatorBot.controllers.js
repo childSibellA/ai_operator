@@ -38,7 +38,7 @@ async function handleNewCustomer(company, newMessage, chat_id) {
 }
 
 async function handleExistingCustomer(customer, newMessage, company) {
-  const { chat_id, full_name, gender, bot_active, phone_number } = customer;
+  const { chat_id, full_name, gender, bot_suspended, phone_number } = customer;
   const { insta_page_access_token, system_instructions, openai_api_key } =
     company;
 
@@ -49,7 +49,7 @@ async function handleExistingCustomer(customer, newMessage, company) {
     const updatedCustomer = await addNewMessage(customer, text, role);
     const { messages } = updatedCustomer;
 
-    if (!bot_active) {
+    if (bot_suspended) {
       return;
     }
     const simplifiedMessages = messages.map(({ role, content }) => ({

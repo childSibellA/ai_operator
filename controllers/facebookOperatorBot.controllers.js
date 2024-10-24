@@ -41,7 +41,7 @@ async function handleNewCustomer(company, newMessage, customer_info) {
 }
 
 async function handleExistingCustomer(customer, newMessage, company) {
-  const { chat_id, full_name, gender, bot_active, phone_number } = customer;
+  const { chat_id, full_name, gender, bot_suspended, phone_number } = customer;
   const { fb_page_access_token, system_instructions, openai_api_key } = company;
 
   const text = newMessage;
@@ -51,13 +51,19 @@ async function handleExistingCustomer(customer, newMessage, company) {
     const updatedCustomer = await addNewMessage(customer, text, role);
     const { messages } = updatedCustomer;
 
-    if (!bot_active) {
+    if (bot_suspended) {
       return;
     }
+
+    // Mark message as seen and typing action
+    await callTypingAPI(chat_id, "mark_seen", fb_page_access_token);
+    await callTypingAPI(chat_id, "typing_on", fb_page_access_token);
+
     const simplifiedMessages = messages.map(({ role, content }) => ({
       role,
       content,
     }));
+
     let tool_choice = "auto";
     const assistant_resp = await createChatWithTools(
       simplifiedMessages,
@@ -186,10 +192,6 @@ export async function handlerFacebook(req, res) {
         try {
           const customer = await getCustomer(chat_id);
           if (newMessage) {
-            // Mark message as seen and typing action
-            await callTypingAPI(chat_id, "mark_seen", fb_page_access_token);
-            await callTypingAPI(chat_id, "typing_on", fb_page_access_token);
-
             if (!customer) {
               let customerInfo = await getCustomerFbInfo(
                 chat_id,

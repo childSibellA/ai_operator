@@ -42,9 +42,9 @@ const CustomerSchema = new mongoose.Schema(
     profile_pic: { type: String, require: false },
     locale: { type: String, require: false },
     timezone: { type: String, require: false },
-    bot_active: {
+    bot_suspended: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     operator_id: {
       type: mongoose.Schema.Types.ObjectId,
